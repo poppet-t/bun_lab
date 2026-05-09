@@ -1,0 +1,1 @@
+[fs.read:canary] controlled stale write observed iteration=1 canary=2 bytesRead=8192

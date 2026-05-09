@@ -1,0 +1,15 @@
+[triage] run-id=20260509T132719Z-78356
+[triage] harness=lab/harnesses/09-css/calc-depth.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=20s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[calc-depth] workdir=/var/folders/pz/l_x3d_4j4g3c2rdgs995kv1r0000gp/T/lab-css-calc-NOuNp2
+[calc-depth] depth=5000 bytes=30014
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==78375==ERROR: AddressSanitizer: stack-overflow on address 0x00016ecbf660 (pc 0x0001064a9fa8 bp 0x00016ecc0710 sp 0x00016ecbf660 T14)
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=5558650)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137

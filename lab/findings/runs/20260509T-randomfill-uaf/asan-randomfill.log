@@ -1,0 +1,4 @@
+=================================================================
+==1363==ERROR: AddressSanitizer: heap-use-after-free on address 0x631000000800 at pc 0x0001150f5e14 bp 0x00016d99ac70 sp 0x00016d99a430
+WRITE of size 8192 at 0x631000000800 thread T6
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=5678747)

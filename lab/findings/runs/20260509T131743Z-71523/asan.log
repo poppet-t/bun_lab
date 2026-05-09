@@ -1,0 +1,24 @@
+[triage] run-id=20260509T131743Z-71523
+[triage] harness=lab/harnesses/09-css/bundle-css.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[css] workdir: /var/folders/pz/l_x3d_4j4g3c2rdgs995kv1r0000gp/T/lab-css-IlIcyl
+[css] case 01 (13 bytes)
+[css] case 02 (40000 bytes)
+[css] case 03 (3202 bytes)
+[css] case 04 (65552 bytes)
+[css]   logs: 1
+[css] case 05 (1039 bytes)
+[css] case 06 (1035 bytes)
+[css]   logs: 1
+[css] case 07 (40016 bytes)
+[css] case 08 (55139 bytes)
+[css] case 09 (3086 bytes)
+[css] case 10 (15 bytes)
+[css] case 11 (29 bytes)
+[css] done
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

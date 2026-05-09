@@ -1,0 +1,9 @@
+/bun/
+/.DS_Store
+**/.DS_Store
+
+# Local-only lab scratch space.
+/lab/build/
+/lab/tools/
+/lab/ctf/*/server.log
+/lab/ctf/*/server.pid

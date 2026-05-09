@@ -1,0 +1,44 @@
+// Canary: planted heap-buffer-overflow on libc-malloc'd memory via bun:ffi.
+//
+// Goal: prove the lab actually catches memory corruption. If this script
+// runs to clean exit under the ASan-instrumented bun, the build is broken
+// (sanitizer disabled, wrong binary, etc.) and any "no crash" result from a
+// real harness is meaningless.
+//
+// Mechanism: we call libc malloc(8), then libc memcpy 32 bytes into it.
+// We use libc directly (not Uint8Array) because JS TypedArray storage
+// comes from JSC's Gigacage — a pre-allocated arena that ASan's malloc
+// interceptor does not track. Routing through libc malloc puts the chunk
+// in the ASan-instrumented heap so the OOB write hits a redzone.
+//
+// Expected: ASan reports `heap-buffer-overflow on address ... WRITE of size 32`.
+
+import { dlopen, FFIType, ptr, suffix } from "bun:ffi";
+
+const path = `libc.${suffix}`;
+const { symbols } = dlopen(path, {
+  malloc: { args: [FFIType.u64], returns: FFIType.ptr },
+  memcpy: {
+    args: [FFIType.ptr, FFIType.ptr, FFIType.u64],
+    returns: FFIType.ptr,
+  },
+  free: { args: [FFIType.ptr], returns: FFIType.void },
+});
+
+// 32-byte source on the JS side; 8-byte destination on the libc heap.
+const src = new Uint8Array(32);
+for (let i = 0; i < src.length; i++) src[i] = 0xaa;
+
+const dst = symbols.malloc(8n);
+if (!dst) {
+  console.error("[canary] FAIL: malloc(8) returned null");
+  process.exit(3);
+}
+
+console.error("[canary] about to overflow libc-malloc'd 8-byte chunk by 24 bytes...");
+symbols.memcpy(dst, ptr(src), BigInt(src.length));
+
+// We won't reach here — ASan should have already aborted the process.
+console.error("[canary] FAIL: ASan did not trip — your build is not instrumented.");
+symbols.free(dst);
+process.exit(2);
