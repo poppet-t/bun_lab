@@ -1,0 +1,60 @@
+[triage] run-id=20260510T072053Z-4737
+[triage] harness=lab/harnesses/13-arb-rw-probes/wide-leak-structureid-recover.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+hex_dump:
+      0  bebebebebebebebebebebebebebebebe
+     16  bebebebebebebebe1811090050620000
+     32  18a1320050620000e200000000000000
+     48  1020000000000000e2010002ff000000
+     64  20220347010000000000000000000000
+     80  00000000000000000000000000000000
+     96  00000000000000000000000000000000
+    112  00000000000000000008034701000000
+    128  f0eedbba000000000004000000040000
+    144  c05c0300d0620000e05c0300d0620000
+    160  005d0300d0620000205d0300d0620000
+    176  405d0300d0620000605d0300d0620000
+    192  805d0300d0620000a05d0300d0620000
+    208  c05d0300d0620000e05d0300d0620000
+    224  005e0300d0620000205e0300d0620000
+    240  405e0300d062000060560300d0620000
+    256  80560300d0620000a0560300d0620000
+    272  c0560300d0620000e0560300d0620000
+    288  00570300d062000020570300d0620000
+    304  40570300d062000060570300d0620000
+
+first_runs:
+  {"start":24,"length":1,"bits":"0x0000625000091118"}
+  {"start":32,"length":1,"bits":"0x000062500032a118"}
+  {"start":144,"length":1,"bits":"0x000062d000035cc0"}
+  {"start":152,"length":1,"bits":"0x000062d000035ce0"}
+  {"start":160,"length":1,"bits":"0x000062d000035d00"}
+  {"start":168,"length":1,"bits":"0x000062d000035d20"}
+  {"start":176,"length":1,"bits":"0x000062d000035d40"}
+  {"start":184,"length":1,"bits":"0x000062d000035d60"}
+  {"start":192,"length":1,"bits":"0x000062d000035d80"}
+  {"start":200,"length":1,"bits":"0x000062d000035da0"}
+  {"start":208,"length":1,"bits":"0x000062d000035dc0"}
+  {"start":216,"length":1,"bits":"0x000062d000035de0"}
+  {"start":224,"length":1,"bits":"0x000062d000035e00"}
+  {"start":232,"length":1,"bits":"0x000062d000035e20"}
+  {"start":240,"length":1,"bits":"0x000062d000035e40"}
+  {"start":248,"length":1,"bits":"0x000062d000035660"}
+
+u32_header_candidates:
+  {"off":24,"u32":"0x91118"}
+  {"off":28,"u32":"0x6250"}
+  {"off":36,"u32":"0x6250"}
+  {"off":40,"u32":"0xe2"}
+  {"off":48,"u32":"0x2010"}
+  {"off":60,"u32":"0xff"}
+  {"off":68,"u32":"0x1"}
+  {"off":124,"u32":"0x1"}
+  {"off":136,"u32":"0x400"}
+  {"off":140,"u32":"0x400"}
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
