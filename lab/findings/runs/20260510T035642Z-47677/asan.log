@@ -1,0 +1,216 @@
+[triage] run-id=20260510T035642Z-47677
+[triage] harness=lab/harnesses/16-ctf-real-service/multipart-report-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:51732
+[challenge:stdout] working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[multipart-report-stress] started port=51732 iterations=220
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] iteration=0 internalErrors=1 fetchErrors=0
+[multipart-report-stress] unexpected ok i=8 status=200 body={"ok":true,"package":"typescript","report":{"name":"../flag.txt","size":32,"type":"text/plain;charset=utf-8","sha256":"6aa7acca5a190750ad7fd78d3b146f6d53af92405
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] unexpected ok i=44 status=200 body={"ok":true,"package":"typescript","report":{"name":"..%2fflag.txt","size":32,"type":"text/plain;charset=utf-8","sha256":"3ef9448397ae2f99365c876d7eeecbde510d1f9
+[multipart-report-stress] iteration=50 internalErrors=5 fetchErrors=0
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] unexpected ok i=80 status=200 body={"ok":true,"package":"typescript","report":{"name":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","size":32,"type":"application/octet-stream
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] iteration=100 internalErrors=11 fetchErrors=0
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] unexpected ok i=116 status=200 body={"ok":true,"package":"typescript","report":{"name":"utf-�.txt","size":32,"type":"text/plain;charset=utf-8","sha256":"86290a0505de9b7d913963007954d1d0c401ba77d3b
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[multipart-report-stress] iteration=150 internalErrors=16 fetchErrors=0
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[multipart-report-stress] unexpected ok i=188 status=200 body={"ok":true,"package":"typescript","report":{"name":"quote","size":32,"type":"application/octet-stream","sha256":"cb0c1d2d9483ff8e50c098abb85177f78b38a6d04558442
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[multipart-report-stress] iteration=200 internalErrors=22 fetchErrors=0
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+{"harness":"multipart-report-stress","iterations":220,"internalErrors":24,"fetchErrors":0,"unexpectedOk":5,"statuses":{"200":87,"400":109,"500":24}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

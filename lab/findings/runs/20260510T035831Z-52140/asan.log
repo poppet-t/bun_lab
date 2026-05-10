@@ -1,0 +1,19 @@
+[triage] run-id=20260510T035831Z-52140
+[triage] harness=lab/harnesses/16-ctf-real-service/websocket-close-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:45159
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[websocket-close-stress] started port=45159 iterations=220
+[websocket-close-stress] iteration=0 upgrades=1 noUpgrade=0 socketErrors=0
+[websocket-close-stress] iteration=50 upgrades=51 noUpgrade=0 socketErrors=0
+[websocket-close-stress] iteration=100 upgrades=101 noUpgrade=0 socketErrors=0
+[websocket-close-stress] iteration=150 upgrades=151 noUpgrade=0 socketErrors=0
+[websocket-close-stress] iteration=200 upgrades=201 noUpgrade=0 socketErrors=0
+{"harness":"websocket-close-stress","iterations":220,"upgrades":220,"noUpgrade":0,"protocolErrors":0,"socketErrors":0}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

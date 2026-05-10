@@ -1,0 +1,39 @@
+[triage] run-id=20260510T035426Z-43185
+[triage] harness=lab/harnesses/16-ctf-real-service/real-service-surface-mutator.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:45204
+[challenge:stdout] working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[real-service-surface-mutator] started port=45204 iterations=500
+[real-service-surface-mutator] iteration=0 internalErrors=0 socketErrors=0 wsUpgrades=0 wsErrors=0
+[challenge:stderr] error: FormData missing final boundary
+
+[real-service-surface-mutator] iteration=100 internalErrors=0 socketErrors=0 wsUpgrades=146 wsErrors=0
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 | 
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[real-service-surface-mutator] iteration=200 internalErrors=0 socketErrors=0 wsUpgrades=323 wsErrors=0
+[real-service-surface-mutator] iteration=300 internalErrors=0 socketErrors=0 wsUpgrades=430 wsErrors=0
+[real-service-surface-mutator] iteration=400 internalErrors=0 socketErrors=0 wsUpgrades=430 wsErrors=0
+{"harness":"real-service-surface-mutator","iterations":500,"port":45204,"internalErrors":0,"socketErrors":0,"wsUpgrades":430,"wsErrors":0,"statuses":{"101":26,"429":24}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
