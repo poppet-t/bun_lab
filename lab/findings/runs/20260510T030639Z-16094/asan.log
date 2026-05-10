@@ -1,0 +1,10 @@
+[triage] run-id=20260510T030639Z-16094
+[triage] harness=lab/harnesses/13-arb-rw-probes/blob-array-leak.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"sprayMode":"array-refs","constructorMode":"file","size":8192,"sprayCount":4096,"slots":1024,"blobSize":8193,"markerOffset":-1,"oldFillRatio":0.0055,"zeroRatio":0.3944,"pointerLikeCount":16,"pointerSamples":[{"offset":24,"value":"0x00006250003c5118"},{"offset":32,"value":"0x0000625000203118"},{"offset":64,"value":"0x000000014361e220"},{"offset":120,"value":"0x000000014361c800"},{"offset":136,"value":"0x0000040000000400"},{"offset":144,"value":"0x000062d000034280"},{"offset":152,"value":"0x000062d0000342a0"},{"offset":160,"value":"0x000062d0000342c0"},{"offset":168,"value":"0x000062d0000342e0"},{"offset":176,"value":"0x000062d000034300"},{"offset":184,"value":"0x000062d000034320"},{"offset":192,"value":"0x000062d000034340"},{"offset":200,"value":"0x000062d000034360"},{"offset":208,"value":"0x000062d000034380"},{"offset":216,"value":"0x000062d0000343a0"},{"offset":224,"value":"0x000062d0000343c0"}],"doubleSamples":[],"prefix":[190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,24,81,60,0,80,98,0,0,24,49,32,0,80,98,0,0,8,2,0,0,0,0,0,0,16,32,0,0,0,0,0,0,226,1,0,2,255,0,0,0]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

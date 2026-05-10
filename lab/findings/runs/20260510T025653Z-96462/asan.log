@@ -1,0 +1,10 @@
+[triage] run-id=20260510T025653Z-96462
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-read-array-double-write.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"iteration":1,"size":8192,"sprayCount":4096,"slots":1024,"writeOffset":144,"writeLength":8,"magic":6.02214076e+23,"bytesRead":8,"found":{"arrayIndex":368,"elementIndex":0,"value":6.02214076e+23}}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)
