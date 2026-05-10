@@ -1,0 +1,15 @@
+[triage] run-id=20260510T063837Z-40509
+[triage] harness=lab/findings/cve-disclosure/poc-minimal-fs-read-uaf.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=20s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+[poc] iteration=16 payload=0xcd
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==40574==ERROR: AddressSanitizer: SEGV on unknown address 0x19b9ba39b9bbb9be (pc 0x000106fd30e8 bp 0x00016f1267f0 sp 0x00016f1267f0 T0)
+==40574==The signal is caused by a READ memory access.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=8603417)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137
