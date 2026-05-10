@@ -1,0 +1,29 @@
+[triage] run-id=20260510T094819Z-68148
+[triage] harness=lab/harnesses/13-arb-rw-probes/fake-cell-from-harvested-header-probe.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"phase":"start","fakeStorage":"doubleArray","fakeStorageSlots":16,"fakeStorageOffset":0,"touchMode":"typeof","donorKind":"plain"}
+{"phase":"victim-addrof","victimAddr":"0x000060f000010748"}
+{"phase":"stage1","attempt":2,"bridgeIndex":1}
+{"phase":"metadata-addr","metadataAddr":"0x000060c0000418c0"}
+{"phase":"stage2","attempt":1,"bridgeIndex":1}
+{"phase":"donor-addrof","donorAddr":"0x000062d0000a66c0"}
+{"phase":"donor-prefix","bytes":"4062000000220000000000000000000000000000000000000000000000000000"}
+{"phase":"fake-storage-addrof","kind":"doubleArray","cellAddr":"0x000062d0016f06a0","length":16}
+{"phase":"fake-storage-cell-prefix","kind":"doubleArray","bytes":"80670000072e080008440500d062000010670000092e08009041dc0150620000"}
+{"phase":"fake-storage-butterfly","butterfly":"0x000062d000054408","fakeBytesAddr":"0x000062d000054408"}
+{"phase":"fakecell-copied","kind":"doubleArray","bytes":"4062000000220000000000000000000000000000000000000000000000000000","matchesDonor":true}
+{"phase":"fake-bytes-addr","kind":"doubleArray","fakeBytesAddr":"0x000062d000054408"}
+{"phase":"planting","bits":"0x000062d000054408"}
+{"phase":"planted","arrayIndex":2}
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==68169==ERROR: AddressSanitizer: SEGV on unknown address 0x0000badbef50 (pc 0x00010a489624 bp 0x00016d20f410 sp 0x00016d20f400 T0)
+==68169==The signal is caused by a READ memory access.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=9318156)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137
+[triage] NEW CRASH: 6b3f8a599dd5 -> /Users/CJ/Documents/bun_lab/lab/findings/crashes/6b3f8a599dd5

