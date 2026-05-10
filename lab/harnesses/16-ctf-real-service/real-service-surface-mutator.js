@@ -305,7 +305,6 @@ function startChallenge() {
     env: {
       ...process.env,
       PORT: String(port),
-      FLAG: "SCTF{local_real_service_probe}",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });

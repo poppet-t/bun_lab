@@ -90,7 +90,7 @@ function makeMultipart(i) {
 
 function startChallenge() {
   child = spawn(process.execPath, [challenge], {
-    env: { ...process.env, PORT: String(port), FLAG: "SCTF{multipart_probe}" },
+    env: { ...process.env, PORT: String(port) },
     stdio: ["ignore", "pipe", "pipe"],
   });
   child.stdout.on("data", chunk => process.stdout.write(`[challenge:stdout] ${chunk}`));
