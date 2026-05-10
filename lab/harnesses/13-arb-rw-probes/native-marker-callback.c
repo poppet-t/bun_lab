@@ -65,24 +65,24 @@ void bun_uaf_marker_callback(void *data, void *ctx) {
   if (ctx) {
     unsigned char *bytes = (unsigned char *)ctx;
     dprintf(fd, "ctx_prefix=");
-    for (int i = 0; i < 64; i++) dprintf(fd, "%02x", bytes[i]);
+    for (int i = 0; i < 256; i++) dprintf(fd, "%02x", bytes[i]);
     dprintf(fd, "\n");
   }
-  /* dump 96 bytes of the caller's code around ra so we can identify the call
-   * site even when it lives in JIT memory not covered by dyld images. */
+  /* dump 320 bytes of the caller's code (-64..+256 around ra) so we can
+   * identify the JIT-mmap'd IC stub even though no dyld image owns it. */
   if (ra) {
     const unsigned char *code = (const unsigned char *)ra - 64;
     dprintf(fd, "ra_code=");
-    for (int i = 0; i < 96; i++) dprintf(fd, "%02x", code[i]);
+    for (int i = 0; i < 320; i++) dprintf(fd, "%02x", code[i]);
     dprintf(fd, "\n");
   }
-  /* dump 128 bytes upstream from the current frame so we can see saved
-   * registers / link chain and detect deeper JIT vs native callers. */
+  /* dump 256 bytes upstream from the current frame so we can see saved
+   * registers, link chain, and JIT prologue bookkeeping. */
   void *fp = __builtin_frame_address(0);
   if (fp) {
     const unsigned char *frame = (const unsigned char *)fp;
     dprintf(fd, "frame_dump=");
-    for (int i = 0; i < 128; i++) dprintf(fd, "%02x", frame[i]);
+    for (int i = 0; i < 256; i++) dprintf(fd, "%02x", frame[i]);
     dprintf(fd, "\n");
   }
   close(fd);

@@ -248,3 +248,111 @@ lab/scripts/triage.sh \
 The marker file `/tmp/bun_uaf_marker_callback` will contain `data`, `ctx`,
 `ra`, the dyld image lookup result, the 96-byte code dump around `ra`, and a
 128-byte frame dump suitable for further reverse-engineering.
+
+## Follow-up: full IC stub disassembly identifies a JSC PutByVal cache
+
+The marker dumps were widened to 320 bytes of code (`ra-64..ra+255`) plus
+256 bytes of `ctx` heap state. Disassembling the captured JIT bytes (wrapped
+into a Mach-O stub with `clang -arch arm64 -c` + `.incbin`, then disassembled
+with `llvm-objdump --triple=aarch64-apple-darwin`) yields:
+
+```text
+ra-0x40: cmp  w3, w17                ; structure-id check
+ra-0x3c: b.ne ra+0x00 (slow path)
+ra-0x38: ldur w3, [x2, #0x8]         ; load capacity-or-shape field
+ra-0x34: cmp  w3, #0x40
+ra-0x30: b.lt ra-0x20
+ra-0x2c: ldur x1, [x1, #0x8]         ; storage pointer load
+ra-0x28: neg  w3, w3                 ; index normalisation
+ra-0x24: sxtw x3, w3
+ra-0x20: b    ra-0x18
+ra-0x1c: sub  x1, x1, #0x1e0
+ra-0x18: add  x17, x1, #0x1f0
+ra-0x14: str  x0, [x17, x3, lsl #3]  ; FAST PATH WRITE (legitimate array)
+ra-0x10: b    ra+0x00                ; skip slow path on success
+ra-0x0c: ldur x9, [x2, #0x38]        ; SLOW PATH: load IC inner struct
+ra-0x08: ldur x16, [x9, #0x10]       ; load slow-call function pointer
+ra-0x04: blr  x16                    ; ** the indirect call we control **
+
+ra+0x00: mov  x16, #0x668
+ra+0x04: movk x16, #0x241, lsl #32   ; X16 = 0x0000_0241_0000_0668
+ra+0x08: mov  x17, #0x218
+ra+0x0c: movk x17, #0x3b1a, lsl #16  ; (slide-dependent)
+ra+0x10: movk x17, #0x1, lsl #32     ; X17 = 0x0000_0001_3b1a_0218
+ra+0x14: str  x16, [x17, xzr]        ; *X17 = X16
+ra+0x18: mov  x0, #0x82a0
+ra+0x1c: movk x0, #0x1f, lsl #16
+ra+0x20: movk x0, #0x62d0, lsl #32   ; X0 = 0x0000_62d0_001f_82a0  == ctx
+ra+0x24: ldurb w1, [x0, #0x7]        ; read JSCell indexing-type byte
+ra+0x28: mov  x17, #0xb50
+ra+0x2c: movk x17, #0x3b18, lsl #16
+ra+0x30: movk x17, #0x1, lsl #32
+ra+0x34: ldr  w16, [x17, xzr]
+ra+0x38: cmp  w16, w1
+ra+0x3c: b.hs ra+0xe6c                ; deopt branch on bound check
+... (subsequent block at +0x9c-0xfc emits BRK #0 with W16=0x113 if the
+     IC's invariants are violated, then re-materialises ctx and emits
+     `orr x1, xzr, #0xfffe000000000000` followed by another call setup)
+```
+
+This identifies the corrupted slot as the **slow-path miss handler of a JSC
+JIT'd `PutByVal` (indexed property store) inline cache**. Specifically:
+
+- The IC's fast path (`str x0, [x17, x3, lsl #3]`) is the in-place array
+  store. It reads from the legitimate JS array's storage pointer; our UAF
+  does not reach that path.
+- The IC's slow path is what we hijack. It calls a function pointer at
+  `[X9 + 16]` where `X9 = [X2 + 56]` of an outer JSC structure (likely the
+  `JITStubInfo` or `PolymorphicAccess` container).
+- Post-call code in this same JIT region uses three baked 48-bit
+  immediates that decode to JSC heap addresses. Two of them
+  (`0x62d0_001f_82a0`, `0x62d0_001f_82b0`) sit in the same partially
+  poisoned heap region as our `ctx` parameter, and the surrounding
+  `ctx_prefix` shows `0xbadbeef0` poison patterns (`f0 ee db ba 00 00 00 00`
+  little-endian) at offsets 32 and 48..255 of `ctx`, with only the first
+  32 bytes still containing valid JSC pointers. This means the JIT compiled
+  this IC against a JSC heap object that has since been freed/poisoned by
+  the allocator — a separate JSC inline-cache freshness condition we do
+  not need to chase for this finding.
+
+Implications for `x0`/`x1` controllability:
+
+- `x1 = 0x62d0_001f_82a0` is materialised after the call by the same
+  baked constants the JIT used before the call. So `x1` is not field-loaded
+  from the corrupted slot at all — it is JIT-baked. We cannot influence it.
+- `x0 = 0xfffe_0000_0000_0000` is later re-emitted explicitly in this same
+  block via `orr x1, xzr, #0xfffe000000000000` (and the `mov x0, x1` swap
+  pattern), confirming the JIT bakes `JSValue::encode(int32_t 0)` directly
+  into the IC stub. We cannot influence this either.
+
+So this slow-path callsite has no field-controlled arguments by design.
+
+## Follow-up: UAF_SIZE sweep
+
+Reclaim-size sweep with the same `WRITE_OFFSET=16 PAYLOAD_LAYOUT=single`
+setup (12 iterations, 8192 spray, marker callback as call target):
+
+| `UAF_SIZE` | result                                                |
+|-----------:|--------------------------------------------------------|
+|         64 | clean exit, marker not called (slot uncalled)          |
+|         96 | crash (`5879 SEGV pc 0x000106b13dfc`), marker not called |
+|        112 | marker called repeatedly with `data=0xfffe000000000000` |
+|        128 | crash (`6303 BUS  pc 0x0001123a6864`), marker not called |
+|        144 | clean exit, marker not called                          |
+|        160 | clean exit, marker not called                          |
+|        192 | clean exit, marker not called                          |
+|        240 | exit 133, marker not called                            |
+
+Crash dirs added: `lab/findings/crashes/aadd7fc40d48` (UAF_SIZE=96) and
+`lab/findings/crashes/5805dff9975b` (UAF_SIZE=128). Both crash inside Bun
+native code at real PCs — they are corruption of a non-IC reclaim target,
+not call-target control. So 112 is uniquely the `PutByVal`-slow-path slot;
+no nearby reclaim size lands in a different IC type with a more useful
+calling shape under this harness.
+
+Net status: PC control through this `PutByVal` IC slow-path slot is real
+but inert for stable RCE. The next productive directions are unchanged from
+the previous section: target a different IC shape (likely needs harness
+changes that warm distinct ICs), find a useful in-process callee tolerant
+of `(JSValue 0, JIT-baked-ctx)`, or pivot to JS-level primitives building
+on the existing object-array identity bridge / Float64Array overlap.

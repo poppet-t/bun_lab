@@ -1,0 +1,19 @@
+[triage] run-id=20260510T061708Z-6283
+[triage] harness=lab/harnesses/13-arb-rw-probes/typedarray-vector-alias-ffi-oracle.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":128,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x000000012b498434","bytesRead":8,"anomalies":[]}
+{"iteration":2,"uafSize":128,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x000000012b498434","bytesRead":8,"anomalies":[]}
+{"iteration":3,"uafSize":128,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x000000012b498434","bytesRead":8,"anomalies":[]}
+{"iteration":4,"uafSize":128,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x000000012b498434","bytesRead":8,"anomalies":[]}
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6303==ERROR: AddressSanitizer: BUS on unknown address (pc 0x0001123a6864 bp 0x00016fd157d0 sp 0x00016fd15790 T0)
+==6303==The signal is caused by a WRITE memory access.
+==6303==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=8525609)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137
