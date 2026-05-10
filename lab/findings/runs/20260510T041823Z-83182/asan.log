@@ -1,0 +1,311 @@
+[triage] run-id=20260510T041823Z-83182
+[triage] harness=lab/harnesses/16-ctf-real-service/multipart-raw-framing-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=180s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:48204
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[multipart-raw-framing-stress] started port=48204 iterations=220
+[challenge:stderr] error: FormData missing final boundary
+
+[multipart-raw-framing-stress] iteration=0 internalErrors=1 socketErrors=0 timeouts=0
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[multipart-raw-framing-stress] iteration=50 internalErrors=14 socketErrors=0 timeouts=7
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[multipart-raw-framing-stress] iteration=100 internalErrors=31 socketErrors=0 timeouts=12
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[multipart-raw-framing-stress] iteration=150 internalErrors=47 socketErrors=0 timeouts=20
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData missing final boundary
+
+[multipart-raw-framing-stress] iteration=200 internalErrors=60 socketErrors=0 timeouts=28
+[challenge:stderr] error: FormData missing final boundary
+
+[challenge:stderr] error: FormData boundary is too long
+
+[challenge:stderr] 405 |   const length = Number(req.headers.get("content-length") ?? 0);
+406 |   if (!Number.isInteger(length) || length <= 0 || length > maxUploadBodyBytes) {
+407 |     throw new HttpError(413, "payload_too_large");
+408 |   }
+409 |
+410 |   const form = await req.formData();
+                               ^
+TypeError: Can't decode form data from body because of incorrect MIME type/boundary
+ code: "ERR_FORMDATA_PARSE_ERROR"
+
+      at handleReportUpload (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:410:26)
+      at withErrors (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:470:18)
+      at fetch (/Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/challenge-server.js:542:14)
+
+[challenge:stderr] error: FormData boundary is too long
+
+{"harness":"multipart-raw-framing-stress","iterations":220,"internalErrors":64,"socketErrors":0,"timeouts":32,"statuses":{"100":12,"200":26,"400":36,"413":36,"415":13,"500":64,"no-status":33}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
