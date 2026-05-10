@@ -1,0 +1,11 @@
+[triage] run-id=20260510T034630Z-31532
+[triage] harness=lab/harnesses/15-arraybuffer-metadata/fs-read-rab-expanded-oob.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":128,"initialLength":128,"maxLength":256,"viewOffset":0,"viewLength":128,"sprayCount":8192,"writeOffset":56,"writeLength":8,"newValue":"0x200","touchMode":"resize-write","probeOffset":256,"resizeTo":512,"bytesRead":8,"changed":null}
+{"iteration":2,"uafSize":128,"initialLength":128,"maxLength":256,"viewOffset":0,"viewLength":128,"sprayCount":8192,"writeOffset":56,"writeLength":8,"newValue":"0x200","touchMode":"resize-write","probeOffset":256,"resizeTo":512,"bytesRead":8,"changed":{"index":4,"before":{"viewLength":128,"viewByteLength":128,"viewByteOffset":0,"bufferByteLength":128,"maxByteLength":512,"first":148,"lastInView":148},"expanded":{"mode":"resize-write","length":128,"byteLength":128,"expectedTail":196,"resizeTo":512,"afterResizeLength":512,"afterResizeReadAtProbeOffset":0,"afterResizeWriteAtProbeOffset":171}}}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

@@ -1,0 +1,16 @@
+[triage] run-id=20260510T034226Z-12709
+[triage] harness=lab/harnesses/15-arraybuffer-metadata/fs-read-metadata-field-matrix.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"caseIndex":1,"iteration":1,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":32,"writeLength":8,"value":"0x40","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":1,"changed":[{"index":32,"kind":"u8","length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":"threw:Receiver must be ArrayBuffer","maxByteLength":"threw:Receiver must be ArrayBuffer","first":97,"last":97,"expected":{"length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":128,"first":97,"last":97}}]}
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==12730==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000040 (pc 0x00010540dea0 bp 0x00016ae5f6a0 sp 0x00016ae5f650 T0)
+==12730==The signal is caused by a READ memory access.
+==12730==Hint: address points to the zero page.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=7888914)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137

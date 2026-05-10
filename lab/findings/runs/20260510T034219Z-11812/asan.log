@@ -1,0 +1,16 @@
+[triage] run-id=20260510T034219Z-11812
+[triage] harness=lab/harnesses/15-request-reachability/chunk-copy-yield-stability.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[chunk-copy-yield-stability] iteration=0 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] iteration=100 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] iteration=200 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] iteration=300 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] iteration=400 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] iteration=500 stale_alias_statuses=0 socket_errors=0
+[chunk-copy-yield-stability] done iterations=600 stale_alias_statuses=0 socket_errors=0
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

@@ -1,0 +1,16 @@
+[triage] run-id=20260510T034255Z-15310
+[triage] harness=lab/harnesses/15-arraybuffer-metadata/fs-read-metadata-field-matrix.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"caseIndex":1,"iteration":1,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x40","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":1,"changed":[{"index":32,"kind":"u8","length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":64,"maxByteLength":64,"first":97,"last":97,"expected":{"length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":128,"first":97,"last":97}}]}
+{"caseIndex":2,"iteration":1,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x81","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":0,"changed":[]}
+{"caseIndex":3,"iteration":2,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x81","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":0,"changed":[]}
+{"caseIndex":4,"iteration":3,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x81","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":0,"changed":[]}
+{"caseIndex":5,"iteration":4,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x81","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":1,"changed":[{"index":1,"kind":"u8","length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":129,"maxByteLength":129,"first":98,"last":98,"expected":{"length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":128,"first":98,"last":98}}]}
+{"caseIndex":6,"iteration":1,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x100","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":1,"changed":[{"index":1,"kind":"u8","length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":256,"maxByteLength":256,"first":98,"last":98,"expected":{"length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":128,"first":98,"last":98}}]}
+{"caseIndex":7,"iteration":1,"sprayMode":"u8","uafSize":128,"viewSize":128,"rabMax":256,"sprayCount":8192,"writeOffset":48,"writeLength":8,"value":"0x200","payloadMode":"u64","expandMode":"none","bytesRead":8,"changedCount":1,"changed":[{"index":1,"kind":"u8","length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":512,"maxByteLength":512,"first":98,"last":98,"expected":{"length":128,"byteLength":128,"byteOffset":0,"bufferByteLength":128,"first":98,"last":98}}]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

