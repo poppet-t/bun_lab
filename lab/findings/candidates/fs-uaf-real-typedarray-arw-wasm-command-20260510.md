@@ -38,6 +38,10 @@ Updated:
 
 - `lab/harnesses/13-arb-rw-probes/wasm-export-code-pointer-redirect-probe.js`
 
+Minimal reviewer entrypoint:
+
+- `lab/harnesses/13-arb-rw-probes/real-typedarray-arw-wasm-command-minimal.js`
+
 New mode:
 
 - `REAL_TYPEDARRAY_ARW=1`
@@ -167,6 +171,42 @@ Run:
 - `lab/findings/runs/20260510T101449Z-15168/asan.log`
 
 Result: default metadata-bridge mode still exits `86` with `ok: true`.
+
+## Minimal reviewer command
+
+The minimal wrapper fixes the successful proof configuration and removes the
+need to pass the generic research harness knobs manually:
+
+```sh
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=240 \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/real-typedarray-arw-wasm-command-minimal.js
+```
+
+Run:
+
+- `lab/findings/runs/20260510T102808Z-45210/asan.log`
+
+Result:
+
+```json
+{
+  "realTypedArrayArw": true,
+  "markerAfter": true,
+  "commandMarkerAfter": true,
+  "patchedA": 7,
+  "restoredA": 42,
+  "ok": true
+}
+```
+
+Marker files:
+
+```text
+/tmp/bun_uaf_noffi_command_marker: minimal-real-typedarray-arw-command:45268
+/tmp/bun_uaf_noffi_wasm_marker: wasm-marker:45268
+```
 
 ## Interpretation
 
