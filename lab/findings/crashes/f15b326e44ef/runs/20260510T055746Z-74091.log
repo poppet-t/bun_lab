@@ -1,0 +1,18 @@
+[triage] run-id=20260510T055746Z-74091
+[triage] harness=lab/harnesses/13-arb-rw-probes/typedarray-vector-alias-ffi-oracle.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":0,"payloadLayout":"single","payloadWords":"0xaaaa000000000001,0xaaaa000000000002,callback,0xaaaa000000000004,0xaaaa000000000005,0xaaaa000000000006,0xaaaa000000000007,0xaaaa000000000008,0xaaaa000000000009,0xaaaa00000000000a,0xaaaa00000000000b,0xaaaa00000000000c,0xaaaa00000000000d,0xaaaa00000000000e","payloadLength":112,"releaseAfterRead":false,"sourcePointer":"0x0000000126220434","bytesRead":112,"anomalies":[]}
+{"iteration":2,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":0,"payloadLayout":"single","payloadWords":"0xaaaa000000000001,0xaaaa000000000002,callback,0xaaaa000000000004,0xaaaa000000000005,0xaaaa000000000006,0xaaaa000000000007,0xaaaa000000000008,0xaaaa000000000009,0xaaaa00000000000a,0xaaaa00000000000b,0xaaaa00000000000c,0xaaaa00000000000d,0xaaaa00000000000e","payloadLength":112,"releaseAfterRead":false,"sourcePointer":"0x0000000126220434","bytesRead":112,"anomalies":[]}
+{"iteration":3,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":0,"payloadLayout":"single","payloadWords":"0xaaaa000000000001,0xaaaa000000000002,callback,0xaaaa000000000004,0xaaaa000000000005,0xaaaa000000000006,0xaaaa000000000007,0xaaaa000000000008,0xaaaa000000000009,0xaaaa00000000000a,0xaaaa00000000000b,0xaaaa00000000000c,0xaaaa00000000000d,0xaaaa00000000000e","payloadLength":112,"releaseAfterRead":false,"sourcePointer":"0x0000000126220434","bytesRead":112,"anomalies":[]}
+{"iteration":4,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer","writeOffset":0,"payloadLayout":"single","payloadWords":"0xaaaa000000000001,0xaaaa000000000002,callback,0xaaaa000000000004,0xaaaa000000000005,0xaaaa000000000006,0xaaaa000000000007,0xaaaa000000000008,0xaaaa000000000009,0xaaaa00000000000a,0xaaaa00000000000b,0xaaaa00000000000c,0xaaaa00000000000d,0xaaaa00000000000e","payloadLength":112,"releaseAfterRead":false,"sourcePointer":"0x0000000126220434","bytesRead":112,"anomalies":[]}
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==74112==ERROR: AddressSanitizer: SEGV on unknown address 0x1555408000020004 (pc 0x000107d34ad8 bp 0x00016d1de330 sp 0x00016d1de2d0 T3)
+==74112==The signal is caused by a READ memory access.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=8452264)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137

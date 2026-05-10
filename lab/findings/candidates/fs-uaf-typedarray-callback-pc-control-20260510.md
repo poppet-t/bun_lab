@@ -153,3 +153,98 @@ sentinel in the tested runs.
 This means the current primitive is best described as local native call-control
 with a fixed bad first argument. It is RCE-adjacent, but the remaining exploit
 work is argument control or a suitable in-process call target/gadget.
+
+## Follow-up: x0 source and JIT caller identification
+
+The marker callback was extended to capture the return address, walk
+`_dyld_image_count()` to find the owning image, and dump 96 bytes of caller
+code at `ra-64` plus 128 bytes of frame state. Latest run:
+
+- `lab/findings/runs/20260510T060147Z-84691/asan.log`
+  - `data=0xfffe000000000000` (`JSC::JSValue::encode(int32_t 0)`,
+    matching `NumberTag = 0xfffe000000000000` from
+    `bun/src/runtime/ffi/FFI.h:97`)
+  - `ctx=0x62d0001f82a0` (real heap pointer, stable across iterations)
+  - `ra=0x11e3e885c` with `img=?` and `base=0x0` after iterating every
+    `_dyld_get_image_header()` segment, so the caller does not live in any
+    dyld-loaded image. It lives in JIT-mmap'd code.
+
+Decoding the four 4-byte AArch64 instructions immediately preceding `ra`
+(little-endian per the dump):
+
+```text
+ra-16: 49 80 43 f8 -> 0xf8438049 -> LDUR X9,  [X2, #56]
+ra-12: 04 00 00 14 -> 0x14000004 -> B    +0x10
+ra-8:  30 01 41 f8 -> 0xf8410130 -> LDUR X16, [X9, #16]
+ra-4:  00 02 3f d6 -> 0xd63f0200 -> BLR  X16
+```
+
+Post-call, the JIT immediately materializes 48-bit pointers via
+`MOV X16, #imm; MOVK X16, #imm, LSL #32` pairs, the canonical JSC JIT pattern
+for baking heap-resident addresses into compiled code.
+
+Conclusions:
+
+- The corrupted slot is reached by a two-hop load: caller frame uses `X2` as
+  a base pointer, loads `X9 = [X2 + 56]`, then loads `X16 = [X9 + 16]` and
+  `BLR X16`. So the 112-byte allocation we reclaim is not a "free-form heap
+  object"; it is the inner structure referenced from `[X2 + 56]` of a JSC
+  inline-cache / JIT-baked container.
+- `x0` is a literal `JSValue::encode(int32_t 0)` set by the JIT prologue
+  before `BLR X16`. It is not loaded from the corrupted slot. A 56-byte
+  `WRITE_OFFSET=0 PAYLOAD_WORDS=...,callback,...` sweep covering offsets
+  0..55 confirmed that no offset in our payload alters `data` away from
+  `0xfffe000000000000` (`lab/findings/runs/20260510T055613Z-71719/asan.log`,
+  `lab/findings/runs/20260510T055920Z-78895/asan.log`).
+- Writing past offset ~55 of the corrupted struct breaks an unrelated
+  invariant. With a full 112-byte payload of `0xaaaa00000000000N` sentinels,
+  Bun crashed at a real native PC (`pc 0x000107d34ad8`) reading
+  `0x1555408000020004` before the marker call could fire
+  (`lab/findings/runs/20260510T055746Z-74091/asan.log`,
+  crash dir `lab/findings/crashes/f15b326e44ef`). So Bun does read fields
+  beyond offset 24 of this allocation, but those reads happen in code we
+  haven't isolated yet.
+- `ctx = 0x62d0001f82a0` (i.e. `x1`) is also not field-controlled by the
+  reclaim payload. Its first 64 bytes contain `0xbadbeef0` poison sentinels
+  at offsets 32, 48, 56, indicating partial allocator poisoning of the region
+  that holds it. Treat `x1` as fixed JIT/JSC-managed state for now.
+
+What this changes about the threat model:
+
+- The primitive is best classified as **PC control through a JIT inline-cache
+  stub structure with hard-coded `JSValue::encode(0)` as `x0`**. Direct
+  argument injection through the corrupted struct is not viable from this
+  callsite.
+- To turn this into stable RCE, the next useful work is one of:
+  1. find a different IC / cached call shape whose first argument is loaded
+     from a controlled field of the same reclaim slot,
+  2. find a Bun- or JSC-internal callee whose `f(JSValue 0, JSGlobalObject*)`
+     entry path performs an attacker-useful action (e.g. property lookup on
+     `globalThis`, `unsafe-eval`, native `system`-like wrapper),
+  3. or pivot away from this callsite and turn the existing object-array
+     identity bridge / Float64Array overlap / `byteLength` corruption into a
+     stronger JS-level primitive (addrof / fakeobj / stable arbitrary R/W).
+- For Bun upstream reporting, the disclosure-relevant facts are unchanged:
+  local JS with `node:fs` triggers a `BufferSource` lifetime UAF that lets
+  attacker-chosen 64-bit values land in a JIT-cached function-pointer slot,
+  giving controlled native call-target. Stable RCE is not currently proven.
+
+Repro:
+
+```sh
+clang -dynamiclib -fPIC -O0 -g \
+  -o /tmp/libbun_uaf_marker_callback.dylib \
+  lab/harnesses/13-arb-rw-probes/native-marker-callback.c
+
+ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0 \
+TIMEOUT=45 ITERATIONS=12 UAF_SIZE=112 VIEW_SIZE=128 SPRAY_COUNT=8192 \
+WRITE_OFFSET=16 PAYLOAD_LAYOUT=single \
+POINTER_LIBRARY=/tmp/libbun_uaf_marker_callback.dylib \
+POINTER_SYMBOL=bun_uaf_marker_callback \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/typedarray-vector-alias-ffi-oracle.js
+```
+
+The marker file `/tmp/bun_uaf_marker_callback` will contain `data`, `ctx`,
+`ra`, the dyld image lookup result, the 96-byte code dump around `ra`, and a
+128-byte frame dump suitable for further reverse-engineering.
