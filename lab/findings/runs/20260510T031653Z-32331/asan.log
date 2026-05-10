@@ -1,0 +1,30 @@
+[triage] run-id=20260510T031653Z-32331
+[triage] harness=lab/harnesses/14-ctf-request-surface/body-chunk-stability.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=60s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[body-chunk-stability] iteration=0
+[body-chunk-stability] iteration=100
+[body-chunk-stability] iteration=200
+[body-chunk-stability] iteration=300
+[body-chunk-stability] iteration=400
+[body-chunk-stability] iteration=500
+[body-chunk-stability] iteration=600
+[body-chunk-stability] iteration=700
+[body-chunk-stability] iteration=800
+[body-chunk-stability] iteration=900
+[body-chunk-stability] iteration=1000
+[body-chunk-stability] iteration=1100
+[body-chunk-stability] iteration=1200
+[body-chunk-stability] iteration=1300
+[body-chunk-stability] iteration=1400
+[body-chunk-stability] iteration=1500
+[body-chunk-stability] iteration=1600
+[body-chunk-stability] iteration=1700
+[body-chunk-stability] iteration=1800
+[body-chunk-stability] iteration=1900
+[body-chunk-stability] done iterations=2000
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

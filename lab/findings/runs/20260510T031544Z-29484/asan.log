@@ -1,0 +1,30 @@
+[triage] run-id=20260510T031544Z-29484
+[triage] harness=lab/harnesses/14-ctf-request-surface/ctf-http-mutator.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[ctf-http-mutator] iteration=0
+[ctf-http-mutator] iteration=500
+[ctf-http-mutator] iteration=1000
+[ctf-http-mutator] iteration=1500
+[ctf-http-mutator] iteration=2000
+[ctf-http-mutator] iteration=2500
+[ctf-http-mutator] iteration=3000
+[ctf-http-mutator] iteration=3500
+[ctf-http-mutator] iteration=4000
+[ctf-http-mutator] iteration=4500
+[ctf-http-mutator] iteration=5000
+[ctf-http-mutator] iteration=5500
+[ctf-http-mutator] iteration=6000
+[ctf-http-mutator] iteration=6500
+[ctf-http-mutator] iteration=7000
+[ctf-http-mutator] iteration=7500
+[ctf-http-mutator] iteration=8000
+[ctf-http-mutator] iteration=8500
+[ctf-http-mutator] iteration=9000
+[ctf-http-mutator] iteration=9500
+[ctf-http-mutator] done iterations=10000
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
