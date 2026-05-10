@@ -73,6 +73,18 @@ Confirmed:
 - the corrupted value can reach native PC under the tested reclaim profile
 - the harness supports fixed layouts and custom `PAYLOAD_WORDS` for follow-up
   field-layout probes
+- offset `16` is an actual indirect call target, not only a crash artifact:
+  resolving libc `exit` and writing that address at offset `16` cleanly exited
+  before the harness final line (`20260510T053636Z-25899`)
+- a locally loaded diagnostic callback can be invoked through the same offset:
+  `bun_uaf_marker_callback` from `/tmp/libbun_uaf_marker_callback.dylib`
+  created `/tmp/bun_uaf_marker_callback` (`20260510T053900Z-33110`);
+  the later stderr-instrumented run records repeated callback invocation in
+  the triage log itself (`20260510T054633Z-55057`)
+- the diagnostic callback records the call ABI as
+  `data=0xfffe000000000000` and a real heap-like `ctx` pointer
+  (`20260510T053934Z-35049`, `20260510T054051Z-38483`,
+  `20260510T054633Z-55057`)
 
 Not confirmed:
 
@@ -86,5 +98,58 @@ Next useful work:
 - recover a reliable stack/callsite for the controlled-PC crash
 - map the reclaimed 112-byte allocation type and field layout
 - avoid assuming the slot uses the `ArrayBuffer` finalizer ABI until proven
+- find a way to control the first call argument (`x0`) or redirect through a
+  real in-process gadget/wrapper that uses the controlled call target with the
+  available arguments
 - keep CTF verification separate: the current CTF solve is only the local
   static-asset symlink path, not remote RCE
+
+## Follow-up: call-control proof and x0 blocker
+
+Additional harness support was added after the initial controlled-PC result:
+
+- `POINTER_LIBRARY` for resolving a symbol from a local diagnostic dylib
+- `TARGET_MODE=ffi-arraybuffer` for testing whether sprayed FFI ArrayBuffer
+  finalizers can become the corrupted callback target
+- `DETACH_MODE` variants for checking whether the poison first argument depends
+  on `ArrayBuffer.transfer(0)`
+- `PAYLOAD_LAYOUT=prefix-callback` for testing whether the corrupted allocation
+  pointer itself is passed as the first argument
+
+The strongest new proof is local call control:
+
+```sh
+clang -dynamiclib -fPIC -O0 -g \
+  -o /tmp/libbun_uaf_marker_callback.dylib \
+  lab/harnesses/13-arb-rw-probes/native-marker-callback.c
+
+ASAN_OPTIONS=...:quarantine_size_mb=0 \
+TIMEOUT=30 ITERATIONS=8 UAF_SIZE=112 VIEW_SIZE=128 SPRAY_COUNT=8192 \
+WRITE_OFFSET=16 \
+POINTER_LIBRARY=/tmp/libbun_uaf_marker_callback.dylib \
+POINTER_SYMBOL=bun_uaf_marker_callback \
+PAYLOAD_LAYOUT=single \
+lab/scripts/triage.sh \
+  lab/harnesses/13-arb-rw-probes/typedarray-vector-alias-ffi-oracle.js
+```
+
+Result: the marker callback was invoked and wrote the marker file. This proves
+the corrupted offset can call an attacker-selected loaded native function.
+
+The reason this is still not a clean `system(command)` chain is the call ABI.
+The callback receives:
+
+```text
+data=0xfffe000000000000
+ctx=0x62d0001f82a0
+```
+
+`system` uses the first argument, so it attempts to read the poisoned `data`
+pointer and crashes before executing the command. Multi-word payload layouts,
+prefix-command layouts, `DETACH_MODE=clone`, `DETACH_MODE=transfer-same`, and
+`TARGET_MODE=ffi-arraybuffer` did not change `data` away from the poison
+sentinel in the tested runs.
+
+This means the current primitive is best described as local native call-control
+with a fixed bad first argument. It is RCE-adjacent, but the remaining exploit
+work is argument control or a suitable in-process call target/gadget.
