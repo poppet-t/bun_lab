@@ -1,0 +1,16 @@
+[triage] run-id=20260510T065909Z-72122
+[triage] harness=lab/harnesses/13-arb-rw-probes/object-bridge-fakeobj-probe.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"phase":"planted","fakeTargetSpec":"hex:0x00007fffdeadbef0","bits":"0x00007fffdeadbef0"}
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==72142==ERROR: AddressSanitizer: SEGV on unknown address 0x7fffdeadbef5 (pc 0x0001088d16fc bp 0x00016ce8ae10 sp 0x00016ce8adf0 T0)
+==72142==The signal is caused by a READ memory access.
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=8675553)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137
+[triage] NEW CRASH: 9fb1438b7e67 -> /Users/CJ/Documents/bun_lab/lab/findings/crashes/9fb1438b7e67
