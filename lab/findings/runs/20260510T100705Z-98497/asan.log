@@ -1,0 +1,200 @@
+[triage] run-id=20260510T100705Z-98497
+[triage] harness=lab/harnesses/17-remote-cve-probes/fetch-decompression-framing-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+Decompression error: ZlibError
+Decompression error: ZlibError
+Decompression error: BrotliDecompressionError
+Decompression error: ZstdDecompressionError
+{
+  "harness": "fetch-decompression-framing-stress",
+  "iterations": 240,
+  "cases": {
+    "gzip-chunked-truncated-tail": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "gzip-chunked-close-mid-member": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "gzip-content-length-short-extra": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "gzip-content-length-long-close": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "gzip-multimember-chunked": {
+      "ok": 20,
+      "throws": 0,
+      "statuses": {
+        "200": 20
+      },
+      "lengths": {
+        "4096": 20
+      }
+    },
+    "br-chunked-truncated": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "br-content-length-long-close": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "deflate-zlib-chunked": {
+      "ok": 20,
+      "throws": 0,
+      "statuses": {
+        "200": 20
+      },
+      "lengths": {
+        "118784": 20
+      }
+    },
+    "deflate-raw-length-long-close": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "encoding-stack-confused": {
+      "ok": 20,
+      "throws": 0,
+      "statuses": {
+        "200": 20
+      },
+      "lengths": {
+        "758": 20
+      }
+    },
+    "zstd-like-chunked": {
+      "ok": 0,
+      "throws": 20,
+      "statuses": {
+        "Error": 20
+      },
+      "lengths": {}
+    },
+    "gzip-bomb-drip-abort": {
+      "ok": 19,
+      "throws": 1,
+      "statuses": {
+        "200": 19,
+        "Error": 1
+      },
+      "lengths": {
+        "0": 19
+      }
+    }
+  }
+}
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
