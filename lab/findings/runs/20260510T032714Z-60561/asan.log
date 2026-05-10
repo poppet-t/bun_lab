@@ -1,0 +1,11 @@
+[triage] run-id=20260510T032714Z-60561
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-read-typedarray-metadata-write.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":128,"viewSize":128,"sprayCount":8192,"writeOffset":48,"writeLength":8,"newValue":"0x100","bytesRead":8,"changed":[]}
+{"iteration":2,"uafSize":128,"viewSize":128,"sprayCount":8192,"writeOffset":48,"writeLength":8,"newValue":"0x100","bytesRead":8,"changed":[{"index":0,"length":128,"byteLength":128,"bufferByteLength":256,"byteOffset":0,"first":97,"lastOriginal":97}]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

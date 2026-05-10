@@ -1,0 +1,35 @@
+[triage] run-id=20260510T100739Z-251
+[triage] harness=lab/harnesses/01-http-parser/mutate-loop.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+[http-mutator] iteration=0
+[http-mutator] iteration=100
+[http-mutator] iteration=200
+[http-mutator] iteration=300
+[http-mutator] iteration=400
+[http-mutator] iteration=500
+[http-mutator] iteration=600
+[http-mutator] iteration=700
+[http-mutator] iteration=800
+[http-mutator] iteration=900
+[http-mutator] iteration=1000
+[http-mutator] iteration=1100
+[http-mutator] iteration=1200
+[http-mutator] iteration=1300
+[http-mutator] iteration=1400
+[http-mutator] iteration=1500
+[http-mutator] iteration=1600
+[http-mutator] iteration=1700
+[http-mutator] iteration=1800
+[http-mutator] iteration=1900
+[http-mutator] iteration=2000
+[http-mutator] iteration=2100
+[http-mutator] iteration=2200
+[http-mutator] iteration=2300
+[http-mutator] iteration=2400
+[http-mutator] done iterations=2500
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

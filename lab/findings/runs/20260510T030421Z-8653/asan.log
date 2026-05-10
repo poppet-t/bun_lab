@@ -1,0 +1,10 @@
+[triage] run-id=20260510T030421Z-8653
+[triage] harness=lab/harnesses/13-arb-rw-probes/blob-array-leak.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"sprayMode":"byte-canary","size":8192,"sprayCount":4096,"slots":1024,"blobSize":8193,"markerOffset":-1,"oldFillRatio":0.0004,"zeroRatio":0,"pointerLikeCount":0,"pointerSamples":[],"doubleSamples":[],"prefix":[66,85,78,95,66,76,79,66,95,76,69,65,75,95,66,89,84,69,45,67,65,78,65,82,89,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122,122]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

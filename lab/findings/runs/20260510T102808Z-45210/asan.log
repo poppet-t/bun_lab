@@ -1,0 +1,336 @@
+[triage] run-id=20260510T102808Z-45210
+[triage] harness=lab/harnesses/13-arb-rw-probes/real-typedarray-arw-wasm-command-minimal.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=240s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{
+  "final": true,
+  "harness": "wasm-export-code-pointer-redirect-probe",
+  "noFfi": true,
+  "nativeHelperDylib": false,
+  "realTypedArrayArw": true,
+  "realArwSummary": {
+    "viewSize": 128,
+    "rwCellAddress": "0x000062d000f201f0",
+    "originalVector": "0x000062d000db0180",
+    "originalLength": "0x0000000000000080",
+    "cellPrefixWords": [
+      {
+        "offset": 0,
+        "value": "0x000832000000b040",
+        "class": null
+      },
+      {
+        "offset": 8,
+        "value": "0x0000000000000000",
+        "class": null
+      },
+      {
+        "offset": 16,
+        "value": "0x000062d000db0180",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 24,
+        "value": "0x0000000000000080",
+        "class": null
+      }
+    ]
+  },
+  "markerImport": true,
+  "markerPath": "/tmp/bun_uaf_noffi_wasm_marker",
+  "markerBefore": false,
+  "markerAfter": true,
+  "commandImport": true,
+  "commandMarkerPath": "/tmp/bun_uaf_noffi_command_marker",
+  "markerCommand": "printf 'minimal-real-typedarray-arw-command:%s\\n' \"45268\" > /tmp/bun_uaf_noffi_command_marker",
+  "commandMarkerBefore": false,
+  "commandMarkerAfter": true,
+  "commandResultAfter": {
+    "status": 0,
+    "error": null
+  },
+  "crossModule": true,
+  "fakeDescriptor": true,
+  "fakeDescriptorMode": "replacement",
+  "fakeDescriptorSummary": {
+    "mode": "replacement",
+    "bufferAddress": "0x000062d000f2c140",
+    "metadataAddress": "0x000060c001b3af00",
+    "dataAddress": "0x0000602000199010",
+    "originalDescriptorPointer": "0x0000602000199358",
+    "originalDescriptorWord": "0x0000000119ba0640",
+    "originalDescriptorWordClass": "low-code-or-image",
+    "replacementDescriptorPointer": "0x0000602000199578",
+    "replacementDescriptorWord": "0x0000000119be4180",
+    "replacementDescriptorWordClass": "low-code-or-image",
+    "shellcodeData": null,
+    "fakeDescriptorWord": "0x0000000119be4180",
+    "fakeDescriptorWordClass": "low-code-or-image"
+  },
+  "wasmExecField": 24,
+  "wasmCodeField": 24,
+  "patchScope": "cell",
+  "patchField": 48,
+  "extraCellFields": [
+    40
+  ],
+  "extraPatches": [
+    {
+      "offset": 40,
+      "address": "0x0000611000004470",
+      "originalValue": "0x0000615000022708",
+      "originalClass": "asan-heap",
+      "replacementValue": "0x0000616000012a08",
+      "replacementClass": "asan-heap"
+    }
+  ],
+  "patchTarget": "function-cell",
+  "patchAddress": "0x0000611000004478",
+  "originalPatchValue": "0x0000602000199358",
+  "originalPatchClass": "asan-heap",
+  "replacementPatchValue": "0x0000602000199578",
+  "replacementPatchClass": "asan-heap",
+  "effectiveReplacementPatchValue": "0x0000602000199010",
+  "effectiveReplacementPatchClass": "asan-heap",
+  "warmIterations": 10000,
+  "victimAddress": "0x000060f0000067d8",
+  "wrapperAddress": "0x000060c000047c80",
+  "originalDataPtr": "0x000060c000003280",
+  "beforeA": 42,
+  "beforeB": 7,
+  "infoA": {
+    "label": "a",
+    "functionAddress": "0x0000611000004448",
+    "execAddress": "0x000062d0003544a0",
+    "execClass": "asan-heap",
+    "codeAddress": "0x0000000119bcc270",
+    "codeClass": "low-code-or-image",
+    "cellWords": [
+      {
+        "offset": 0,
+        "value": "0x000e2400000364e0",
+        "class": null
+      },
+      {
+        "offset": 8,
+        "value": "0x000062d000338468",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 16,
+        "value": "0x000062500000a188",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 24,
+        "value": "0x000062d0003544a0",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 32,
+        "value": "0x000061100002e043",
+        "class": null
+      },
+      {
+        "offset": 40,
+        "value": "0x0000615000022708",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 48,
+        "value": "0x0000602000199358",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 56,
+        "value": "0x000060f000007480",
+        "class": "asan-heap"
+      }
+    ],
+    "execWords": [
+      {
+        "offset": 0,
+        "value": "0x00000a0000004560",
+        "class": null
+      },
+      {
+        "offset": 8,
+        "value": "0x000060400002fe90",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 16,
+        "value": "0x000060400002f8d0",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 24,
+        "value": "0x0000000119bcc270",
+        "class": "low-code-or-image"
+      },
+      {
+        "offset": 32,
+        "value": "0x0000000119bac0e0",
+        "class": "low-code-or-image"
+      },
+      {
+        "offset": 40,
+        "value": "0x0000000108091294",
+        "class": null
+      },
+      {
+        "offset": 48,
+        "value": "0x00000001071574b4",
+        "class": null
+      },
+      {
+        "offset": 56,
+        "value": "0x00000000badbeef0",
+        "class": null
+      }
+    ]
+  },
+  "infoB": {
+    "label": "b",
+    "functionAddress": "0x00006110000046c8",
+    "execAddress": "0x000062d0003544f0",
+    "execClass": "asan-heap",
+    "codeAddress": "0x0000000119bcc270",
+    "codeClass": "low-code-or-image",
+    "cellWords": [
+      {
+        "offset": 0,
+        "value": "0x000e2400000364e0",
+        "class": null
+      },
+      {
+        "offset": 8,
+        "value": "0x000062d0003384a8",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 16,
+        "value": "0x000062500000a188",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 24,
+        "value": "0x000062d0003544f0",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 32,
+        "value": "0x0000611000046003",
+        "class": null
+      },
+      {
+        "offset": 40,
+        "value": "0x0000616000012a08",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 48,
+        "value": "0x0000602000199578",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 56,
+        "value": "0x000060f000007480",
+        "class": "asan-heap"
+      }
+    ],
+    "execWords": [
+      {
+        "offset": 0,
+        "value": "0x00000a0000004560",
+        "class": null
+      },
+      {
+        "offset": 8,
+        "value": "0x000060400002fe90",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 16,
+        "value": "0x000060400002f8d0",
+        "class": "asan-heap"
+      },
+      {
+        "offset": 24,
+        "value": "0x0000000119bcc270",
+        "class": "low-code-or-image"
+      },
+      {
+        "offset": 32,
+        "value": "0x0000000119bac0e0",
+        "class": "low-code-or-image"
+      },
+      {
+        "offset": 40,
+        "value": "0x0000000108091294",
+        "class": null
+      },
+      {
+        "offset": 48,
+        "value": "0x00000001071574b4",
+        "class": null
+      },
+      {
+        "offset": 56,
+        "value": "0x00000000badbeef0",
+        "class": null
+      }
+    ]
+  },
+  "patchedA": 7,
+  "restoredA": 42,
+  "rereadAExecWords": [
+    {
+      "offset": 0,
+      "value": "0x00000a0000004560",
+      "class": null
+    },
+    {
+      "offset": 8,
+      "value": "0x000060400002fe90",
+      "class": "asan-heap"
+    },
+    {
+      "offset": 16,
+      "value": "0x000060400002f8d0",
+      "class": "asan-heap"
+    },
+    {
+      "offset": 24,
+      "value": "0x0000000119bcc270",
+      "class": "low-code-or-image"
+    },
+    {
+      "offset": 32,
+      "value": "0x0000000119bac0e0",
+      "class": "low-code-or-image"
+    },
+    {
+      "offset": 40,
+      "value": "0x0000000108091294",
+      "class": null
+    },
+    {
+      "offset": 48,
+      "value": "0x00000001071574b4",
+      "class": null
+    },
+    {
+      "offset": 56,
+      "value": "0x00000000badbeef0",
+      "class": null
+    }
+  ],
+  "conclusion": "patching export a metadata makes a() reach the marker wasm import path and execute the configured local command marker, then restores to 42",
+  "ok": true
+}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

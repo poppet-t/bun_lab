@@ -1,0 +1,20 @@
+[triage] run-id=20260510T042015Z-88092
+[triage] harness=lab/harnesses/16-ctf-real-service/websocket-burst-close-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=180s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:54113
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[websocket-burst-close-stress] started port=54113 iterations=180
+[websocket-burst-close-stress] iteration=0 upgrades=1 noUpgrade=0 socketErrors=0 timeouts=0
+[websocket-burst-close-stress] iteration=30 upgrades=31 noUpgrade=0 socketErrors=0 timeouts=0
+[websocket-burst-close-stress] iteration=60 upgrades=61 noUpgrade=0 socketErrors=0 timeouts=0
+[websocket-burst-close-stress] iteration=90 upgrades=91 noUpgrade=0 socketErrors=0 timeouts=0
+[websocket-burst-close-stress] iteration=120 upgrades=121 noUpgrade=0 socketErrors=0 timeouts=0
+[websocket-burst-close-stress] iteration=150 upgrades=151 noUpgrade=0 socketErrors=0 timeouts=0
+{"harness":"websocket-burst-close-stress","iterations":180,"upgrades":180,"noUpgrade":0,"socketErrors":0,"timeouts":0,"closeBuckets":{"1008":60,"1009":30,"none":90}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

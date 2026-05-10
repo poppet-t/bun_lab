@@ -1,0 +1,33 @@
+[triage] run-id=20260510T100418Z-93893
+[triage] harness=lab/harnesses/17-remote-cve-probes/ws-permessage-deflate-server-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+[ws-permessage-deflate-server-stress] started port=50917 iterations=400 maxPayloadLength=2048
+[ws-permessage-deflate-server-stress] iteration=0 upgrades=1 handshakeDeflate=1 messages=1 socketErrors=0
+[ws-permessage-deflate-server-stress] iteration=100 upgrades=101 handshakeDeflate=101 messages=188 socketErrors=0
+[ws-permessage-deflate-server-stress] iteration=200 upgrades=201 handshakeDeflate=201 messages=373 socketErrors=0
+[ws-permessage-deflate-server-stress] iteration=300 upgrades=301 handshakeDeflate=301 messages=529 socketErrors=0
+{
+  "harness": "ws-permessage-deflate-server-stress",
+  "iterations": 400,
+  "port": 50917,
+  "maxPayloadLength": 2048,
+  "upgrades": 400,
+  "handshakeDeflate": 400,
+  "noUpgrade": 0,
+  "messages": 714,
+  "closes": 400,
+  "socketErrors": 0,
+  "timeouts": 0,
+  "closeBuckets": {
+    "1006": 377,
+    "1008": 46,
+    "none": 377
+  },
+  "ok": true
+}
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

@@ -1,0 +1,18 @@
+[triage] run-id=20260510T054442Z-51402
+[triage] harness=lab/harnesses/13-arb-rw-probes/typedarray-vector-alias-ffi-oracle.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=35s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"iteration":1,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":2,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":3,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":4,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":5,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":6,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":7,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"iteration":8,"uafSize":112,"viewSize":128,"sprayCount":8192,"targetMode":"u8","detachMode":"transfer-same","writeOffset":16,"payloadLayout":"single","payloadLength":8,"releaseAfterRead":false,"sourcePointer":"0x00000001456dc434","bytesRead":8,"anomalies":[]}
+{"final":true,"iterations":8,"successes":0,"sourceFirst":65,"sourceLast":190,"sourcePointer":"0x00000001456dc434","targetMode":"u8","detachMode":"transfer-same","pointerSymbol":"bun_uaf_marker_callback","pointerLibrary":"/tmp/libbun_uaf_marker_callback.dylib","payloadLayout":"single","releaseAfterRead":false}
+---
+[triage] exit=1
+[triage] no crash signature found (clean exit or non-sanitizer failure)

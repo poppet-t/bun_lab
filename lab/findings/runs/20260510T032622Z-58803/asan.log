@@ -1,0 +1,10 @@
+[triage] run-id=20260510T032622Z-58803
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-write-overlap-scan.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"iteration":1,"sprayMode":"byte-canary","size":128,"sprayCount":8192,"slots":16,"bytesWritten":128,"writeDone":true,"markerOffset":-1,"sourceFillRatio":0,"zeroRatio":0.5313,"pointerLikeCount":4,"pointerSamples":[{"offset":8,"value":"0x00006020000113b0"},{"offset":16,"value":"0x000060c000042580"},{"offset":24,"value":"0x0000603000047e60"},{"offset":80,"value":"0x0000619000043000"}],"doubleSamples":[],"prefix":[1,0,0,0,190,190,190,190,176,19,1,0,32,96,0,0,128,37,4,0,192,96,0,0,96,126,4,0,48,96,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,0,0,0,0,0,0,0,128,0,0,0,0,0,0,0]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

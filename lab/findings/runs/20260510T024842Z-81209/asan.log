@@ -1,0 +1,11 @@
+[triage] run-id=20260510T024842Z-81209
+[triage] harness=lab/harnesses/12-uaf-models/async-fs-write-stale-read.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=20s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[fs.write:stale-read] reclaimed marker observed source=arraybuffer target=arraybuffer iteration=1 offset=0 detached=1 canaries=2048 bytesWritten=8192
+[fs.write:stale-read] done found=true modes=write sources=arraybuffer target=arraybuffer
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

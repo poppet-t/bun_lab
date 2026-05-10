@@ -1,0 +1,47 @@
+[triage] run-id=20260510T095645Z-82497
+[triage] harness=lab/harnesses/13-arb-rw-probes/real-typedarray-vector-patch-arw.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"phase":"start","shift":17,"aliasWrite":90}
+{"phase":"victim-addrof","victimAddr":"0x000060f000010558"}
+{"phase":"stage1","attempt":3,"bridgeIndex":2}
+{"phase":"metadata-addr","metadataAddr":"0x000060c000047e00"}
+{"phase":"stage2","attempt":2,"bridgeIndex":1}
+{"phase":"typedarray-cells","rwCellAddr":"0x000062d001e7d8a0","rwVector":"0x000062d001cb8150","rwLength":"0x0000000000000008","targetCellAddr":"0x000062d001e7d8d0","targetVector":"0x0000606000016700","targetLength":"0x0000000000000040","aliasAddr":"0x0000606000016711"}
+{
+  "phase": "summary",
+  "ok": true,
+  "bridge": {
+    "victimAddr": "0x000060f000010558",
+    "metadataAddr": "0x000060c000047e00",
+    "dataPtrOffset": 16
+  },
+  "typedArrayOffsets": {
+    "vector": 16,
+    "length": 24
+  },
+  "rwCellAddr": "0x000062d001e7d8a0",
+  "rwVector": "0x000062d001cb8150",
+  "rwLength": "0x0000000000000008",
+  "targetCellAddr": "0x000062d001e7d8d0",
+  "targetVector": "0x0000606000016700",
+  "targetLength": "0x0000000000000040",
+  "shift": 17,
+  "aliasAddr": "0x0000606000016711",
+  "aliasReadBefore": 65,
+  "targetBefore": 65,
+  "aliasWrite": 90,
+  "aliasReadAfter": 90,
+  "targetAfter": 90,
+  "restoreVector": "0x000062d001cb8150",
+  "restoreLength": "0x0000000000000008",
+  "bridgeError": null,
+  "rwPrefixHex": "40b000000032080000000000000000005081cb01d06200000800000000000000",
+  "targetPrefixHex": "40b0000000320800a809e701d062000000670100606000004000000000000000",
+  "rwPrefixAfterRestoreHex": "40b000000032080000000000000000005081cb01d06200000800000000000000"
+}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

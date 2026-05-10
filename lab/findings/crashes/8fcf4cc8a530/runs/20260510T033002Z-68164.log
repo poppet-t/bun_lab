@@ -1,0 +1,13 @@
+[triage] run-id=20260510T033002Z-68164
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-arraybuffer-backing-alias.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=45s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+=================================================================
+==68183==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60c00002a100 at pc 0x0001085bc2e8 bp 0x00016db079d0 sp 0x00016db079c8
+READ of size 8 at 0x60c00002a100 thread T0
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=7812668)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137

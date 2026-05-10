@@ -1,0 +1,10 @@
+[triage] run-id=20260510T025618Z-94539
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-write-overlap-scan.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"iteration":1,"sprayMode":"array-doubles","size":8192,"sprayCount":4096,"slots":1024,"bytesWritten":8192,"writeDone":true,"markerOffset":-1,"sourceFillRatio":0,"zeroRatio":0.0107,"pointerLikeCount":5,"pointerSamples":[{"offset":24,"value":"0x0000625000091118"},{"offset":32,"value":"0x0000625000348118"},{"offset":64,"value":"0x000000013cda6220"},{"offset":120,"value":"0x000000013cda4800"},{"offset":136,"value":"0x0000040000000400"}],"doubleSamples":[{"offset":144,"value":387.37},{"offset":152,"value":387.370977},{"offset":160,"value":387.371953},{"offset":168,"value":387.37293},{"offset":176,"value":387.373906},{"offset":184,"value":387.374883},{"offset":192,"value":387.375859},{"offset":200,"value":387.376836},{"offset":208,"value":387.377813},{"offset":216,"value":387.378789},{"offset":224,"value":387.379766},{"offset":232,"value":387.380742},{"offset":240,"value":387.381719},{"offset":248,"value":387.382695},{"offset":256,"value":387.383672},{"offset":264,"value":387.384648}],"prefix":[190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,190,24,17,9,0,80,98,0,0,24,129,52,0,80,98,0,0,232,0,0,0,0,0,0,0,16,32,0,0,0,0,0,0,226,1,0,2,255,0,0,0]}
+---
+[triage] exit=86
+[triage] no crash signature found (clean exit or non-sanitizer failure)

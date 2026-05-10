@@ -1,0 +1,22 @@
+[triage] run-id=20260510T035741Z-50024
+[triage] harness=lab/harnesses/16-ctf-real-service/static-bunfile-range-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:45043
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[static-bunfile-range-stress] started port=45043 iterations=2000
+[static-bunfile-range-stress] iteration=0 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=250 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=500 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=750 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=1000 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=1250 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=1500 internalErrors=0 fetchErrors=0
+[static-bunfile-range-stress] iteration=1750 internalErrors=0 fetchErrors=0
+{"harness":"static-bunfile-range-stress","iterations":2000,"internalErrors":0,"fetchErrors":0,"statuses":{"200":1152,"206":152,"404":239,"416":30,"429":427}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

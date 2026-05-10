@@ -1,0 +1,36 @@
+[triage] run-id=20260510T034305Z-17269
+[triage] harness=lab/harnesses/15-request-reachability/raw-utf8-json-matrix.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=90s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[raw-utf8-json-matrix] iteration=0 mismatches=0 internal_errors=0
+[raw-utf8-json-matrix] mismatch iteration=1 manual=400:empty_body text=400:empty_body json=200:null body_len=0
+[raw-utf8-json-matrix] mismatch iteration=7 manual=400:invalid_utf8 text=200:object json=200:object body_len=15
+[raw-utf8-json-matrix] mismatch iteration=8 manual=400:invalid_utf8 text=200:object json=200:object body_len=16
+[raw-utf8-json-matrix] mismatch iteration=9 manual=400:invalid_utf8 text=200:object json=200:object body_len=17
+[raw-utf8-json-matrix] mismatch iteration=10 manual=400:invalid_utf8 text=200:object json=200:object body_len=17
+[raw-utf8-json-matrix] mismatch iteration=11 manual=400:invalid_utf8 text=200:object json=200:object body_len=18
+[raw-utf8-json-matrix] mismatch iteration=12 manual=400:invalid_utf8 text=200:object json=200:object body_len=16
+[raw-utf8-json-matrix] mismatch iteration=16 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=17
+[raw-utf8-json-matrix] mismatch iteration=17 manual=400:empty_body text=400:empty_body json=200:null body_len=0
+[raw-utf8-json-matrix] mismatch iteration=18 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=1
+[raw-utf8-json-matrix] mismatch iteration=19 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=2
+[raw-utf8-json-matrix] mismatch iteration=20 manual=400:invalid_utf8 text=200:object json=200:object body_len=27
+[raw-utf8-json-matrix] mismatch iteration=21 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=20
+[raw-utf8-json-matrix] mismatch iteration=22 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=20
+[raw-utf8-json-matrix] mismatch iteration=23 manual=400:invalid_utf8 text=200:object json=200:object body_len=15
+[raw-utf8-json-matrix] mismatch iteration=24 manual=400:invalid_utf8 text=200:object json=200:object body_len=16
+[raw-utf8-json-matrix] mismatch iteration=25 manual=400:invalid_utf8 text=200:object json=200:object body_len=17
+[raw-utf8-json-matrix] mismatch iteration=26 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=17
+[raw-utf8-json-matrix] mismatch iteration=27 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=18
+[raw-utf8-json-matrix] mismatch iteration=28 manual=400:invalid_utf8 text=400:invalid_json json=400:invalid_json body_len=16
+[raw-utf8-json-matrix] iteration=50 mismatches=32 internal_errors=0
+[raw-utf8-json-matrix] iteration=100 mismatches=62 internal_errors=0
+[raw-utf8-json-matrix] iteration=150 mismatches=89 internal_errors=0
+[raw-utf8-json-matrix] iteration=200 mismatches=122 internal_errors=0
+[raw-utf8-json-matrix] iteration=250 mismatches=148 internal_errors=0
+{"harness":"raw-utf8-json-matrix","iterations":300,"mismatches":180,"internalErrors":0,"counters":{"json:200:array":7,"json:200:null":19,"json:200:object":99,"json:400:invalid_json":175,"manual:200:array":7,"manual:200:object":40,"manual:400:empty_body":22,"manual:400:invalid_json":73,"manual:400:invalid_utf8":158,"text:200:array":7,"text:200:object":99,"text:400:empty_body":22,"text:400:invalid_json":172}}
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

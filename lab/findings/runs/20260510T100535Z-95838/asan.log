@@ -1,0 +1,29 @@
+[triage] run-id=20260510T100535Z-95838
+[triage] harness=lab/harnesses/03-decompression/fetch-bombs.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+[decomp] server up at http://127.0.0.1:64679
+[decomp] gzip-as-deflate (40 bytes, ce=deflate)
+Decompression error: ZlibError
+[decomp]   threw: ZlibError fetching "http://127.0.0.1:64679/gzip-as-deflate". For more information, pass `verbose: true` in the second argument to fetch()
+[decomp] trunc-gzip (16 bytes, ce=gzip)
+Decompression error: ZlibError
+[decomp]   threw: ZlibError fetching "http://127.0.0.1:64679/trunc-gzip". For more information, pass `verbose: true` in the second argument to fetch()
+[decomp] bad-gzip-trailer (40 bytes, ce=gzip)
+Decompression error: ZlibError
+[decomp]   threw: ZlibError fetching "http://127.0.0.1:64679/bad-gzip-trailer". For more information, pass `verbose: true` in the second argument to fetch()
+[decomp] deflate-noise (12 bytes, ce=deflate)
+[decomp]   status=200 len=1024
+[decomp] br-bomb-10mb (27 bytes, ce=br)
+[decomp]   status=200 len=10485760
+[decomp] gzip-empty (0 bytes, ce=gzip)
+[decomp]   status=200 len=0
+[decomp] gzip-as-zstd (40 bytes, ce=zstd)
+Decompression error: ZstdDecompressionError
+[decomp]   threw: ZstdDecompressionError fetching "http://127.0.0.1:64679/gzip-as-zstd". For more information, pass `verbose: true` in the second argument to fetch()
+[decomp] done
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

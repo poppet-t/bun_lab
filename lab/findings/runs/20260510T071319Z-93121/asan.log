@@ -1,0 +1,15 @@
+[triage] run-id=20260510T071319Z-93121
+[triage] harness=lab/harnesses/13-arb-rw-probes/fake-cell-layout-mapper.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=15s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"phase":"planted","template":"biguint64Array","delta":48,"targetAddr":"0x00006100000035c8","plantedBits":"0x00006100000035f8"}
+=================================================================
+==93140==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6100000035fd at pc 0x000109d0d810 bp 0x00016ba4edc0 sp 0x00016ba4edb8
+READ of size 1 at 0x6100000035fd thread T0
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=8725890)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137
+[triage] NEW CRASH: 613983369ad3 -> /Users/CJ/Documents/bun_lab/lab/findings/crashes/613983369ad3

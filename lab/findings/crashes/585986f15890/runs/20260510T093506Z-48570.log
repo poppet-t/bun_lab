@@ -1,0 +1,26 @@
+[triage] run-id=20260510T093506Z-48570
+[triage] harness=lab/harnesses/13-arb-rw-probes/fake-cell-from-harvested-header-probe.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=300s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+{"phase":"start"}
+{"phase":"victim-addrof","victimAddr":"0x000060f000010558"}
+{"phase":"stage1","attempt":3,"bridgeIndex":1}
+{"phase":"metadata-addr","metadataAddr":"0x000060c000041bc0"}
+{"phase":"stage2","attempt":0,"bridgeIndex":1}
+{"phase":"donor-addrof","donorAddr":"0x000062d0000356a0"}
+{"phase":"donor-prefix","bytes":"606f0300002200000000000000000000f0272200d06200000000000000000000"}
+{"phase":"fakecell-copied","bytes":"606f0300002200000000000000000000f0272200d06200000000000000000000"}
+{"phase":"fakecellbuf-addrof","cellAddr":"0x0000610000002ac8"}
+{"phase":"fakecellbuf-prefix","bytes":"f0cb0000003c080078c12000d062000000bb0100606000000800000000000000"}
+{"phase":"fake-bytes-addr","fakeBytesAddr":"0x000060600001bb00"}
+{"phase":"planting","bits":"0x000060600001bb00"}
+{"phase":"planted","arrayIndex":3}
+=================================================================
+==48606==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x606000018008 at pc 0x000107348644 bp 0x00016fa16c50 sp 0x00016fa16c48
+READ of size 8 at 0x606000018008 thread T0
+AddressSanitizer: CHECK failed: sanitizer_procmaps_mac.cpp:272 "((res)) == ((0))" (0xffffffffffffffff, 0x0) (tid=9273823)
+[triage] process wedged post-ASan-report (macOS 26 known bug); killed
+---
+[triage] exit=137

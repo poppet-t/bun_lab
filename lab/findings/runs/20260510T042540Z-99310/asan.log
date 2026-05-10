@@ -1,0 +1,20 @@
+[triage] run-id=20260510T042540Z-99310
+[triage] harness=lab/harnesses/16-ctf-real-service/http-lifecycle-body-stress.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=180s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0
+---
+[challenge:stdout] bun-rce-ctf listening on http://127.0.0.1:56331
+working directory: /Users/CJ/Documents/bun_lab/lab/ctf/bun-rce/
+[http-lifecycle-body-stress] started port=56331 iterations=260
+[http-lifecycle-body-stress] iteration=0 internalErrors=0 socketErrors=0 timeouts=0
+[http-lifecycle-body-stress] iteration=50 internalErrors=0 socketErrors=0 timeouts=3
+[http-lifecycle-body-stress] iteration=100 internalErrors=0 socketErrors=0 timeouts=5
+[http-lifecycle-body-stress] iteration=150 internalErrors=0 socketErrors=0 timeouts=7
+[http-lifecycle-body-stress] iteration=200 internalErrors=0 socketErrors=0 timeouts=9
+[http-lifecycle-body-stress] iteration=250 internalErrors=0 socketErrors=0 timeouts=12
+{"harness":"http-lifecycle-body-stress","iterations":260,"internalErrors":0,"socketErrors":0,"timeouts":12,"statuses":{"100":11,"200":148,"400":89,"401":14,"404":6,"413":21,"415":7,"429":169,"no-status":12}}
+[challenge] exited code=null signal=SIGTERM
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)

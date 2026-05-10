@@ -1,0 +1,10 @@
+[triage] run-id=20260510T033039Z-69508
+[triage] harness=lab/harnesses/13-arb-rw-probes/fs-arraybuffer-backing-alias.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=30s
+[triage] ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:symbolize=1:allocator_may_return_null=1:quarantine_size_mb=0
+---
+{"uafSize":128,"viewSize":128,"sprayCount":8192,"leakOffset":8,"writeOffset":16,"attempts":[{"pointer":"0x3232323232323232","pointerLike":false,"prefix":[50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50]},{"pointer":"0x0000602000051450","pointerLike":true,"prefix":[1,0,0,0,190,190,190,190,80,20,5,0,32,96,0,0]}],"leakedPointer":"0x0000602000051450","leakBytesWritten":128,"leakPrefix":[1,0,0,0,190,190,190,190,80,20,5,0,32,96,0,0,128,36,74,0,192,96,0,0,192,105,4,0,48,96,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,0,0,0,0,0,0,0,128,0,0,0,0,0,0,0],"write":{"best":{"attempt":1,"bytesRead":8,"aliases":[],"writes":[]},"attempts":[{"attempt":1,"bytesRead":8,"aliases":[],"writes":[]}]}}
+---
+[triage] exit=1
+[triage] no crash signature found (clean exit or non-sanitizer failure)

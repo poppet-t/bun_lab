@@ -1,0 +1,21 @@
+[triage] run-id=20260510T100734Z-99721
+[triage] harness=lab/harnesses/01-http-parser/serve-malformed.js
+[triage] bin=/Users/CJ/Documents/bun_lab/bun/build/release-asan/bun-asan
+[triage] timeout=120s
+[triage] ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:exitcode=66:detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:check_initialization_order=1:detect_invalid_pointer_pairs=2:fast_unwind_on_fatal=1:malloc_context_size=64:allocator_may_return_null=0:print_stats=0:symbolize=0:print_module_map=0:quarantine_size_mb=0
+---
+[http-parser] listening on 127.0.0.1:65331
+[http-parser] baseline bytes=35
+[http-parser] missing-host bytes=42
+[http-parser] obs-fold bytes=54
+[http-parser] duplicate-cl bytes=86
+[http-parser] chunk-ext bytes=116
+[http-parser] short-chunk bytes=83
+[http-parser] nul-header bytes=39
+[http-parser] long-header bytes=65585
+[http-parser] weird-method bytes=41
+[http-parser] absolute bytes=59
+[http-parser] done
+---
+[triage] exit=0
+[triage] no crash signature found (clean exit or non-sanitizer failure)
